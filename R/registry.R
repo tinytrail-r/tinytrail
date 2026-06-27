@@ -47,7 +47,14 @@
       path <- parent
     }
   }
-  getwd()
+  .script_dir() %||% getwd()
+}
+
+# Resolve the registry file path. Uses the path stored by tinylog_script(), or
+# falls back to the tinylog.file option (default: "_tinylog_proj.yaml").
+.registry_path <- function() {
+  getOption(".tinylog_registry_path") %||%
+    file.path(.find_root(), getOption("tinylog.file", "_tinylog_proj.yaml"))
 }
 
 .in_knitr <- function() {
@@ -145,19 +152,24 @@
 #' @param name Character. Script name. Detected automatically when run via `source()`.
 #' @param pin_to_top Logical. Pin this script to the top of the registry. Default `FALSE`.
 #' @param record_runtime Logical. Record elapsed time on exit. Default `TRUE`.
+#' @param yaml_file Character. Registry file name. Defaults to the `tinylog.file` option,
+#'   or `"_tinylog_proj.yaml"` if unset. Set `options(tinylog.file = "my_log.yaml")` to
+#'   change it project-wide.
 #'
 #' @export
 tinylog_script <- function(data_source,
                              description,
                              name = .get_current_script_name(),
                              pin_to_top = FALSE,
-                             record_runtime = TRUE) {
+                             record_runtime = TRUE,
+                             yaml_file = getOption("tinylog.file", "_tinylog_proj.yaml")) {
   if (is.null(name)) {
     message("tinylog_script: could not detect script name; run via source() or pass name= explicitly")
     return(invisible(NULL))
   }
 
-  registry_path <- file.path(.find_root(), "_registry.yaml")
+  registry_path <- file.path(.find_root(), yaml_file)
+  options(.tinylog_registry_path = registry_path)
 
   if (file.exists(registry_path)) {
     registry <- yaml::read_yaml(registry_path)
@@ -285,7 +297,7 @@ tl_script <- tinylog_script
 #' write.csv(tab, file = tinylog_output(here::here("data/misc/summary.csv")))
 #' }
 tinylog_output <- function(file) {
-  registry_path <- file.path(.find_root(), "_registry.yaml")
+  registry_path <- .registry_path()
   script_name   <- getOption(".tinylog_current_script")
 
   if (is.null(script_name)) stop(
@@ -352,7 +364,7 @@ tinylog_dict <- function(df, name = NULL, sample_values = TRUE, sample_string_le
     "tinylog_dict() requires a data frame."
   )
 
-  registry_path <- file.path(.find_root(), "_registry.yaml")
+  registry_path <- .registry_path()
   if (!file.exists(registry_path)) return(invisible(df))
 
   registry <- yaml::read_yaml(registry_path)

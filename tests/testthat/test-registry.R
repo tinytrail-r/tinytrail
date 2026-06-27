@@ -1,12 +1,12 @@
 test_that("tinylog_output() errors without tinylog_script()", {
-  options(.tinylog_current_script = NULL)
+  withr::local_options(.tinylog_current_script = NULL, .tinylog_registry_path = NULL)
   expect_error(tinylog_output("some/file.png"), "tinylog_script")
 })
 
 test_that("tinylog_script() sets the script name option", {
   tmp <- withr::local_tempdir()
   withr::local_dir(tmp)
-  withr::local_options(.tinylog_current_script = NULL)
+  withr::local_options(.tinylog_current_script = NULL, .tinylog_registry_path = NULL)
 
   tinylog_script(
     name        = "test.R",
@@ -16,13 +16,13 @@ test_that("tinylog_script() sets the script name option", {
   )
 
   expect_equal(getOption(".tinylog_current_script"), "test.R")
-  expect_true(file.exists("_registry.yaml"))
+  expect_true(file.exists("_tinylog_proj.yaml"))
 })
 
 test_that("tinylog_output() registers path and returns it", {
   tmp <- withr::local_tempdir()
   withr::local_dir(tmp)
-  withr::local_options(.tinylog_current_script = NULL)
+  withr::local_options(.tinylog_current_script = NULL, .tinylog_registry_path = NULL)
 
   tinylog_script(
     name        = "test.R",
@@ -36,24 +36,24 @@ test_that("tinylog_output() registers path and returns it", {
 
   expect_equal(result, path)
 
-  reg <- yaml::read_yaml("_registry.yaml")
+  reg <- yaml::read_yaml("_tinylog_proj.yaml")
   expect_true(any(grepl("output.png", unlist(reg$scripts[["test.R"]]$outputs))))
 })
 
 test_that("tinylog_dict() errors without tinylog_script()", {
-  withr::local_options(.tinylog_current_script = NULL)
+  withr::local_options(.tinylog_current_script = NULL, .tinylog_registry_path = NULL)
   expect_error(tinylog_dict(data.frame(x = 1)), "tinylog_script")
 })
 
 test_that("tinylog_dict() errors on non-data-frame", {
-  withr::local_options(.tinylog_current_script = "test.R")
+  withr::local_options(.tinylog_current_script = "test.R", .tinylog_registry_path = NULL)
   expect_error(tinylog_dict(list(x = 1)), "data frame")
 })
 
 test_that("tinylog_dict() records columns and sample values in data_dictionary", {
   tmp <- withr::local_tempdir()
   withr::local_dir(tmp)
-  withr::local_options(.tinylog_current_script = NULL)
+  withr::local_options(.tinylog_current_script = NULL, .tinylog_registry_path = NULL)
 
   tinylog_script(
     name        = "test.R",
@@ -67,7 +67,7 @@ test_that("tinylog_dict() records columns and sample values in data_dictionary",
 
   expect_identical(result, df)
 
-  reg <- yaml::read_yaml("_registry.yaml")
+  reg <- yaml::read_yaml("_tinylog_proj.yaml")
   entry <- reg$data_dictionary[["test.R"]][["my_data"]]
   expect_length(entry$columns$mpg, 5L)
   expect_length(entry$columns$cyl, 5L)
@@ -76,7 +76,7 @@ test_that("tinylog_dict() records columns and sample values in data_dictionary",
 test_that("tinylog_dict() uses sequential names when name is NULL", {
   tmp <- withr::local_tempdir()
   withr::local_dir(tmp)
-  withr::local_options(.tinylog_current_script = NULL)
+  withr::local_options(.tinylog_current_script = NULL, .tinylog_registry_path = NULL)
 
   tinylog_script(
     name        = "test.R",
@@ -89,7 +89,7 @@ test_that("tinylog_dict() uses sequential names when name is NULL", {
   df |> tinylog_dict()
   df |> tinylog_dict()
 
-  reg <- yaml::read_yaml("_registry.yaml")
+  reg <- yaml::read_yaml("_tinylog_proj.yaml")
   expect_true(!is.null(reg$data_dictionary[["test.R"]][["input_1"]]))
   expect_true(!is.null(reg$data_dictionary[["test.R"]][["input_2"]]))
 })
@@ -97,7 +97,7 @@ test_that("tinylog_dict() uses sequential names when name is NULL", {
 test_that("tinylog_dict() omits sample values when sample_values = FALSE", {
   tmp <- withr::local_tempdir()
   withr::local_dir(tmp)
-  withr::local_options(.tinylog_current_script = NULL)
+  withr::local_options(.tinylog_current_script = NULL, .tinylog_registry_path = NULL)
 
   tinylog_script(
     name        = "test.R",
@@ -109,7 +109,7 @@ test_that("tinylog_dict() omits sample values when sample_values = FALSE", {
   df <- data.frame(x = 1:3, y = letters[1:3])
   df |> tinylog_dict(sample_values = FALSE)
 
-  reg <- yaml::read_yaml("_registry.yaml")
+  reg <- yaml::read_yaml("_tinylog_proj.yaml")
   entry <- reg$data_dictionary[["test.R"]][["input_1"]]
   expect_equal(unlist(entry$columns), c("x", "y"))
 })
@@ -117,7 +117,7 @@ test_that("tinylog_dict() omits sample values when sample_values = FALSE", {
 test_that("tinylog_dict() truncates long strings at sample_string_length", {
   tmp <- withr::local_tempdir()
   withr::local_dir(tmp)
-  withr::local_options(.tinylog_current_script = NULL)
+  withr::local_options(.tinylog_current_script = NULL, .tinylog_registry_path = NULL)
 
   tinylog_script(
     name        = "test.R",
@@ -129,7 +129,7 @@ test_that("tinylog_dict() truncates long strings at sample_string_length", {
   df <- data.frame(label = c("short", "this is a very long string indeed"), x = 1:2)
   df |> tinylog_dict(sample_string_length = 18L)
 
-  reg <- yaml::read_yaml("_registry.yaml")
+  reg <- yaml::read_yaml("_tinylog_proj.yaml")
   labels <- unlist(reg$data_dictionary[["test.R"]][["input_1"]]$columns$label)
   expect_equal(labels[[1]], "short")
   expect_equal(labels[[2]], "this is a very lon...")
@@ -139,7 +139,7 @@ test_that("tinylog_dict() truncates long strings at sample_string_length", {
 test_that("tinylog_dict() respects sample_string_length = Inf", {
   tmp <- withr::local_tempdir()
   withr::local_dir(tmp)
-  withr::local_options(.tinylog_current_script = NULL)
+  withr::local_options(.tinylog_current_script = NULL, .tinylog_registry_path = NULL)
 
   tinylog_script(
     name        = "test.R",
@@ -152,7 +152,7 @@ test_that("tinylog_dict() respects sample_string_length = Inf", {
   df <- data.frame(label = long)
   df |> tinylog_dict(sample_string_length = Inf)
 
-  reg <- yaml::read_yaml("_registry.yaml")
+  reg <- yaml::read_yaml("_tinylog_proj.yaml")
   val <- reg$data_dictionary[["test.R"]][["input_1"]]$columns$label[[1]]
   expect_equal(nchar(val), 100L)
 })
@@ -160,7 +160,7 @@ test_that("tinylog_dict() respects sample_string_length = Inf", {
 test_that("n_files is correct after lapply over multiple outputs", {
   tmp <- withr::local_tempdir()
   withr::local_dir(tmp)
-  withr::local_options(.tinylog_current_script = NULL)
+  withr::local_options(.tinylog_current_script = NULL, .tinylog_registry_path = NULL)
 
   tinylog_script(
     name        = "test.R",
@@ -172,7 +172,7 @@ test_that("n_files is correct after lapply over multiple outputs", {
   paths <- file.path(tmp, paste0("plot_", 1:3, ".png"))
   lapply(paths, tinylog_output)
 
-  reg <- yaml::read_yaml("_registry.yaml")
+  reg <- yaml::read_yaml("_tinylog_proj.yaml")
   expect_equal(reg$scripts[["test.R"]]$n_files, 3L)
   expect_length(reg$scripts[["test.R"]]$outputs, 3L)
 })
@@ -181,7 +181,7 @@ test_that("n_files is correct after purrr::map over multiple outputs", {
   skip_if_not_installed("purrr")
   tmp <- withr::local_tempdir()
   withr::local_dir(tmp)
-  withr::local_options(.tinylog_current_script = NULL)
+  withr::local_options(.tinylog_current_script = NULL, .tinylog_registry_path = NULL)
 
   tinylog_script(
     name        = "test.R",
@@ -193,7 +193,7 @@ test_that("n_files is correct after purrr::map over multiple outputs", {
   paths <- file.path(tmp, paste0("plot_", 1:3, ".png"))
   purrr::map(paths, tinylog_output)
 
-  reg <- yaml::read_yaml("_registry.yaml")
+  reg <- yaml::read_yaml("_tinylog_proj.yaml")
   expect_equal(reg$scripts[["test.R"]]$n_files, 3L)
   expect_length(reg$scripts[["test.R"]]$outputs, 3L)
 })
