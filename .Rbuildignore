@@ -1,3 +1,6 @@
 ^tinylog\.Rproj$
 ^\.Rproj\.user$
 ^LICENSE\.md$
+^vignettes/.*\.html$
+^doc$
+^Meta$
