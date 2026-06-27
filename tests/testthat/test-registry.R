@@ -95,7 +95,7 @@ test_that("tinylog_dict() auto-names entry from df variable name", {
   expect_true(!is.null(reg$data_dictionary[["test.R"]][["df2"]]))
 })
 
-test_that("tinylog_dict() auto-increments duplicate df names to _2, _3", {
+test_that("tinylog_dict() warns and overwrites on duplicate df name", {
   tmp <- withr::local_tempdir()
   withr::local_dir(tmp)
   withr::local_options(.tinylog_current_script = NULL, .tinylog_registry_path = NULL)
@@ -109,14 +109,11 @@ test_that("tinylog_dict() auto-increments duplicate df names to _2, _3", {
 
   dat <- data.frame(x = 1:3)
   dat |> tinylog_dict()
-  dat |> tinylog_dict()
-  dat |> tinylog_dict()
+  expect_warning(dat |> tinylog_dict(), "overwriting")
 
   reg <- yaml::read_yaml("_tinylog_proj.yaml")
   entries <- names(reg$data_dictionary[["test.R"]])
-  expect_true("dat"   %in% entries)
-  expect_true("dat_2" %in% entries)
-  expect_true("dat_3" %in% entries)
+  expect_equal(entries, "dat")
 })
 
 test_that("tinylog_dict() omits sample values when sample_values = FALSE", {

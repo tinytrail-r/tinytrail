@@ -386,10 +386,12 @@ tinylog_dict <- function(df, .name = NULL, sample_values = TRUE, sample_string_l
   }
 
   if (!is.null(registry$data_dictionary[[script_name]][[name]])) {
-    base <- name
-    i <- 2L
-    while (!is.null(registry$data_dictionary[[script_name]][[paste0(base, "_", i)]])) i <- i + 1L
-    name <- paste0(base, "_", i)
+    warning(
+      "tinylog_dict(): '", name, "' already recorded for '", script_name,
+      "' — overwriting. Use .name to distinguish stages (e.g. .name = \"",
+      name, "_clean\").",
+      call. = FALSE
+    )
   }
 
   clip <- function(v) {
