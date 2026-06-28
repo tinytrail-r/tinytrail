@@ -7,3 +7,7 @@
 ^doc$
 ^Meta$
 ^project_notes$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^\.github$

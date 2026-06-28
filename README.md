@@ -7,7 +7,7 @@
 ```r
 # Development version from GitHub:
 # install.packages("pak")
-pak::pak("tomasrei/tinytrail")
+pak::pak("tinytrail-r/tinytrail")
 ```
 
 ## Usage
@@ -31,7 +31,7 @@ This creates or updates `_tinytrail.yaml`:
 
 ```yaml
 $version: 0.1.0
-$learn_more: https://github.com/tomasrei/tinytrail
+$learn_more: https://github.com/tinytrail-r/tinytrail
 scripts:
   01_clean.R:
     description: Clean and reshape survey data

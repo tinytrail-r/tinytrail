@@ -68,7 +68,7 @@ the project root on the first run and updated on every subsequent run:
 
 ```yaml
 $version: 0.1.0
-$learn_more: https://github.com/tomasrei/tinytrail
+$learn_more: https://github.com/tinytrail-r/tinytrail
 scripts:
   01_clean.R:
     description: Clean and reshape survey data

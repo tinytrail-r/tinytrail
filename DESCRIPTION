@@ -19,8 +19,8 @@ Encoding: UTF-8
 Language: en-US
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 8.0.0
-URL: https://github.com/tomasrei/tinytrail
-BugReports: https://github.com/tomasrei/tinytrail/issues
+URL: https://github.com/tinytrail-r/tinytrail, https://tinytrail-r.github.io/tinytrail/
+BugReports: https://github.com/tinytrail-r/tinytrail/issues
 Suggests:
     knitr,
     purrr,
