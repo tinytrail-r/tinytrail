@@ -16,6 +16,3 @@ navbar:
   bg: body-tertiary
   type: light
 
-authors:
-  Tomas Reivinger:
-    roles: [aut, cre]
