@@ -5,17 +5,19 @@
 \title{Register a script in the project trail}
 \usage{
 tinytrail(
-  data_source,
   description,
+  data_source = NULL,
   name = .get_current_script_name(),
   pin_to_top = FALSE,
   record_runtime = TRUE
 )
 }
 \arguments{
-\item{data_source}{Character. The input data this script reads (path or description).}
-
 \item{description}{Character. One-line description of what the script does.}
+
+\item{data_source}{Character. The provenance of the data this script reads —
+name the dataset or survey, not a file path (e.g. \code{"Current Population Survey (BLS)"}).
+Optional; omit if there is no meaningful upstream source.}
 
 \item{name}{Character. Script name. Detected automatically when run via \code{source()}.}
 
@@ -39,8 +41,8 @@ dir.create(tmp)
 writeLines("Version: 1.0", file.path(tmp, "DESCRIPTION"))
 old_wd <- setwd(tmp)
 tinytrail(
-  data_source    = "data/raw/survey.csv",
   description    = "Clean and reshape survey data",
+  data_source    = "Current Population Survey (BLS)",
   name           = "01_clean.R",
   record_runtime = FALSE
 )

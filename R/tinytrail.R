@@ -79,7 +79,7 @@
 }
 
 .order_registry_entry <- function(entry) {
-  key_order <- c("data_source", "description", "first_run", "latest_run", "script_runtime", "n_files", "outputs")
+  key_order <- c("description", "data_source", "first_run", "latest_run", "script_runtime", "n_files", "outputs")
   entry[c(intersect(key_order, names(entry)), setdiff(names(entry), key_order))]
 }
 
@@ -161,8 +161,10 @@
 #' `_tinytrail.yaml` and sets the script name so that [tinytrail_write()] can
 #' associate outputs with it.
 #'
-#' @param data_source Character. The input data this script reads (path or description).
 #' @param description Character. One-line description of what the script does.
+#' @param data_source Character. The provenance of the data this script reads —
+#'   name the dataset or survey, not a file path (e.g. `"Current Population Survey (BLS)"`).
+#'   Optional; omit if there is no meaningful upstream source.
 #' @param name Character. Script name. Detected automatically when run via `source()`.
 #' @param pin_to_top Logical. Pin this script to the top of the trail. Default `FALSE`.
 #' @param record_runtime Logical. Record elapsed time on exit. Default `TRUE`.
@@ -178,16 +180,16 @@
 #' writeLines("Version: 1.0", file.path(tmp, "DESCRIPTION"))
 #' old_wd <- setwd(tmp)
 #' tinytrail(
-#'   data_source    = "data/raw/survey.csv",
 #'   description    = "Clean and reshape survey data",
+#'   data_source    = "Current Population Survey (BLS)",
 #'   name           = "01_clean.R",
 #'   record_runtime = FALSE
 #' )
 #' setwd(old_wd)
 #' unlink(tmp, recursive = TRUE)
 #' }
-tinytrail <- function(data_source,
-                      description,
+tinytrail <- function(description,
+                      data_source = NULL,
                       name = .get_current_script_name(),
                       pin_to_top = FALSE,
                       record_runtime = TRUE) {
@@ -211,12 +213,12 @@ tinytrail <- function(data_source,
 
   now <- format(Sys.time(), "%Y-%m-%d %H:%M")
   entry <- list(
-    data_source = data_source,
     description = description,
     first_run   = registry$scripts[[name]]$first_run %||% now,
     latest_run  = now,
     outputs     = "none"
   )
+  if (!is.null(data_source)) entry$data_source <- data_source
   if (pin_to_top) entry$pin_to_top <- TRUE
   registry$scripts[[name]] <- entry
   registry$data_dictionary[[name]] <- NULL

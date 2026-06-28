@@ -34,8 +34,8 @@ library(tinytrail)
 
 # --- top of 01_clean.R ---
 tinytrail(
-  data_source = "The Current Population Survey (BLS)",
-  description = "Clean and reshape survey data"
+  description = "Clean and reshape survey data",
+  data_source = "Current Population Survey (BLS)"
 )
 
 # read and clean
@@ -73,8 +73,8 @@ $version: 0.1.0
 $learn_more: https://github.com/tomasrei/tinytrail
 scripts:
   01_clean.R:
-    data_source: data/raw/survey.csv
     description: Clean and reshape survey data
+    data_source: Current Population Survey (BLS)
     first_run: '2026-01-15 09:12'
     latest_run: '2026-01-20 11:05'
     script_runtime: 0.3 min
@@ -82,8 +82,8 @@ scripts:
     outputs:
     - data/clean/survey_clean.csv
   02_model.R:
-    data_source: data/clean/survey_clean.csv
     description: Fit logistic regression
+    data_source: Cleaned survey data (01_clean.R)
     first_run: '2026-01-16 14:22'
     latest_run: '2026-01-20 11:08'
     script_runtime: 1.4 min
@@ -106,8 +106,8 @@ Pin an important script to the top of the trail:
 
 ```{r pin}
 tinytrail(
-  data_source = "data/raw/master.csv",
   description = "Master data preparation",
+  data_source = "Admin registry (Statistics Sweden)",
   pin_to_top  = TRUE
 )
 ```
