@@ -31,7 +31,7 @@ Place at the end of a read/clean pipeline to capture column names and
 optionally sample values. Returns the data frame unchanged.
 }
 \details{
-Requires \code{\link[=tinytrail]{tinytrail()}} to have been called first in the same session.
+Requires \code{tinytrail()} to have been called first in the same session.
 }
 \examples{
 \donttest{

@@ -18,7 +18,7 @@ current script's trail entry and returns the path unchanged, so it can be
 dropped inline into any save function.
 }
 \details{
-Requires \code{\link[=tinytrail]{tinytrail()}} to have been called first in the same session.
+Requires \code{tinytrail()} to have been called first in the same session.
 }
 \examples{
 \donttest{

@@ -7,21 +7,20 @@
 tinytrail(
   description,
   data_source = NULL,
-  name = .get_current_script_name(),
   pin_to_top = FALSE,
   record_runtime = TRUE
 )
 }
 \arguments{
-\item{description}{Character. One-line description of what the script does.}
+\item{description}{Character. Description of what the script does.}
 
-\item{data_source}{Character. The provenance of the data this script reads —
-name the dataset or survey, not a file path (e.g. \code{"Current Population Survey (BLS)"}).
-Optional; omit if there is no meaningful upstream source.}
+\item{data_source}{Character. Optional. Enter the sources of data used in
+this script — name the dataset or survey, not a file path
+(e.g. \code{"Current Population Survey (BLS)"}).}
 
-\item{name}{Character. Script name. Detected automatically when run via \code{source()}.}
-
-\item{pin_to_top}{Logical. Pin this script to the top of the trail. Default \code{FALSE}.}
+\item{pin_to_top}{Logical. Pin this script to the top of the trail. Useful
+for a \code{main.R} that sources other scripts — keeps it visible at the top of
+\verb{_tinytrail.yaml} regardless of alphabetical order. Default \code{FALSE}.}
 
 \item{record_runtime}{Logical. Record elapsed time on exit. Default \code{TRUE}.}
 }
@@ -31,7 +30,7 @@ creating or updating the YAML trail file in the project root.
 }
 \description{
 Call once near the top of every script. Creates or updates an entry in
-\verb{_tinytrail.yaml} and sets the script name so that \code{\link[=tinytrail_write]{tinytrail_write()}} can
+\verb{_tinytrail.yaml} and sets the script name so that \code{tinytrail_write()} can
 associate outputs with it.
 }
 \examples{
@@ -41,12 +40,21 @@ dir.create(tmp)
 writeLines("Version: 1.0", file.path(tmp, "DESCRIPTION"))
 old_wd <- setwd(tmp)
 options(.tinytrail_registry_path = NULL, .tinytrail_current_script = NULL)
+
+# Standard registration
 tinytrail(
   description    = "Clean and reshape survey data",
   data_source    = "Current Population Survey (BLS)",
-  name           = "01_clean.R",
   record_runtime = FALSE
 )
+
+# Pin a main script to the top of the trail
+tinytrail(
+  description    = "Sources and runs all project scripts in order",
+  pin_to_top     = TRUE,
+  record_runtime = FALSE
+)
+
 setwd(old_wd)
 unlink(tmp, recursive = TRUE)
 }
