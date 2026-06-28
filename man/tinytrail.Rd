@@ -9,7 +9,9 @@ tinytrail(
   data_source = NULL,
   pin_to_top = FALSE,
   record_runtime = TRUE,
-  name = NULL
+  name = NULL,
+  auto = TRUE,
+  extra_hooks = NULL
 )
 }
 \arguments{
@@ -27,6 +29,17 @@ for a \code{main.R} that sources other scripts — keeps it visible at the top o
 
 \item{name}{Character. Override the auto-detected script name. Useful in
 testing or when auto-detection is not available.}
+
+\item{auto}{Logical. Automatically intercept common write functions and
+record their output paths. Default \code{TRUE}. Set to \code{FALSE} to use explicit
+\code{tinytrail_write()} calls instead.}
+
+\item{extra_hooks}{Named character vector of additional write functions to
+intercept when \code{auto = TRUE}. Names are function identifiers (\code{"fn"} for a
+function defined in the script, or \code{"pkg::fn"} for a package function),
+values are the name of the file-path argument in that function. Example:
+\code{c(my_save = "path", "sf::st_write" = "dsn")}. Functions from packages
+that are not installed are silently skipped.}
 }
 \value{
 \code{name} (the script name), invisibly. Called for its side effect of
@@ -34,27 +47,37 @@ creating or updating the YAML trail file in the project root.
 }
 \description{
 Call once near the top of every script. Creates or updates an entry in
-\verb{_tinytrail.yaml} and sets the script name so that \code{tinytrail_write()} can
-associate outputs with it.
+\verb{_tinytrail.yaml} and sets the script name so that outputs can be recorded.
+}
+\details{
+By default (\code{auto = TRUE}) common write functions (\code{write.csv}, \code{saveRDS},
+\code{readr::write_csv}, \code{ggplot2::ggsave}, etc.) are hooked automatically so
+their output file paths are captured without any \code{tinytrail_write()} wrapper.
+Set \code{auto = FALSE} to use explicit \code{tinytrail_write()} calls instead.
 }
 \examples{
 \donttest{
 withr::with_tempdir({
   writeLines("Version: 1.0", "DESCRIPTION")
   withr::with_options(
-    list(.tinytrail_registry_path = NULL, .tinytrail_current_script = NULL), {
+    list(.tinytrail_registry_path = NULL, .tinytrail_current_script = NULL,
+         .tinytrail_traced_fns = NULL, .tinytrail_hooks_table = NULL), {
 
+    # auto = TRUE (default): write.csv captured without tinytrail_write()
     tinytrail(
       description    = "Clean and reshape survey data",
       data_source    = "Current Population Survey (BLS)",
       record_runtime = FALSE,
       name           = "clean.R"
     )
+    write.csv(mtcars, "cars.csv")
 
+    # auto = FALSE: use explicit tinytrail_write() wrappers
     tinytrail(
       description    = "Sources and runs all project scripts in order",
       pin_to_top     = TRUE,
       record_runtime = FALSE,
+      auto           = FALSE,
       name           = "main.R"
     )
   })

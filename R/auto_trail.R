@@ -1,6 +1,4 @@
-# Public API: tinytrail_auto()
-#
-# Sub-functions used exclusively by the public API are defined first.
+# Private helpers for automatic write-call interception (used by tinytrail()).
 
 # Built-in write functions to intercept: key -> list(fn, pkg, arg)
 # "arg" is the parameter name holding the output file path in each function.
@@ -102,77 +100,3 @@
   invisible(NULL)
 }
 
-#' Register a script and automatically track all write/save calls
-#'
-#' Drop-in alternative to `tinytrail()`. Call once near the top of every
-#' script. In addition to registering the script in `_tinytrail.yaml`, it
-#' hooks common write functions (`write.csv`, `saveRDS`, `readr::write_csv`,
-#' `ggplot2::ggsave`, etc.) so their output file paths are recorded
-#' automatically — no `tinytrail_write()` wrapper needed on each save call.
-#' Hooks are silently removed when the script exits.
-#'
-#' @param description Character. Description of what the script does.
-#' @param data_source Character. Optional. Enter the sources of data used in
-#'   this script — name the dataset or survey, not a file path
-#'   (e.g. `"Current Population Survey (BLS)"`).
-#' @param pin_to_top Logical. Pin this script to the top of the trail. Useful
-#'   for a `main.R` that sources other scripts — keeps it visible at the top of
-#'   `_tinytrail.yaml` regardless of alphabetical order. Default `FALSE`.
-#' @param record_runtime Logical. Record elapsed time on exit. Default `TRUE`.
-#' @param name Character. Override the auto-detected script name. Useful in
-#'   testing or when auto-detection is not available.
-#' @param extra_hooks Named character vector of additional write functions to
-#'   intercept. Names are function identifiers (`"fn"` for a function defined
-#'   in the script, or `"pkg::fn"` for a package function), values are the
-#'   name of the file-path argument in that function. Example:
-#'   `c(my_save = "path", "sf::st_write" = "dsn")`. Functions from packages
-#'   that are not installed are silently skipped.
-#'
-#' @returns `name` (the script name), invisibly. Called for its side effect of
-#'   creating or updating the YAML trail file in the project root.
-#' @export
-#'
-#' @examples
-#' \donttest{
-#' withr::with_tempdir({
-#'   writeLines("Version: 1.0", "DESCRIPTION")
-#'   withr::with_options(
-#'     list(.tinytrail_registry_path = NULL, .tinytrail_current_script = NULL,
-#'          .tinytrail_traced_fns = NULL, .tinytrail_hooks_table = NULL), {
-#'
-#'     tinytrail_auto(
-#'       description    = "Clean and reshape survey data",
-#'       data_source    = "Current Population Survey (BLS)",
-#'       record_runtime = FALSE,
-#'       name           = "clean.R"
-#'     )
-#'
-#'     write.csv(mtcars, "cars.csv")   # recorded automatically
-#'     saveRDS(mtcars,   "cars.rds")   # recorded automatically
-#'   })
-#' })
-#' }
-tinytrail_auto <- function(description,
-                           data_source    = NULL,
-                           pin_to_top     = FALSE,
-                           record_runtime = TRUE,
-                           name           = NULL,
-                           extra_hooks    = NULL) {
-  tinytrail(
-    description    = description,
-    data_source    = data_source,
-    pin_to_top     = pin_to_top,
-    record_runtime = record_runtime,
-    name           = name
-  )
-
-  .setup_write_hooks(extra = extra_hooks)
-
-  do.call(
-    on.exit,
-    list(quote(.teardown_write_hooks()), add = TRUE, after = TRUE),
-    envir = parent.frame()
-  )
-
-  invisible(getOption(".tinytrail_current_script"))
-}
