@@ -8,7 +8,8 @@ tinytrail(
   description,
   data_source = NULL,
   pin_to_top = FALSE,
-  record_runtime = TRUE
+  record_runtime = TRUE,
+  name = NULL
 )
 }
 \arguments{
@@ -23,6 +24,9 @@ for a \code{main.R} that sources other scripts — keeps it visible at the top o
 \verb{_tinytrail.yaml} regardless of alphabetical order. Default \code{FALSE}.}
 
 \item{record_runtime}{Logical. Record elapsed time on exit. Default \code{TRUE}.}
+
+\item{name}{Character. Override the auto-detected script name. Useful in
+testing or when auto-detection is not available.}
 }
 \value{
 \code{name} (the script name), invisibly. Called for its side effect of
@@ -35,27 +39,25 @@ associate outputs with it.
 }
 \examples{
 \donttest{
-tmp <- tempfile()
-dir.create(tmp)
-writeLines("Version: 1.0", file.path(tmp, "DESCRIPTION"))
-old_wd <- setwd(tmp)
-options(.tinytrail_registry_path = NULL, .tinytrail_current_script = NULL)
+withr::with_tempdir({
+  writeLines("Version: 1.0", "DESCRIPTION")
+  withr::with_options(
+    list(.tinytrail_registry_path = NULL, .tinytrail_current_script = NULL), {
 
-# Standard registration
-tinytrail(
-  description    = "Clean and reshape survey data",
-  data_source    = "Current Population Survey (BLS)",
-  record_runtime = FALSE
-)
+    tinytrail(
+      description    = "Clean and reshape survey data",
+      data_source    = "Current Population Survey (BLS)",
+      record_runtime = FALSE,
+      name           = "clean.R"
+    )
 
-# Pin a main script to the top of the trail
-tinytrail(
-  description    = "Sources and runs all project scripts in order",
-  pin_to_top     = TRUE,
-  record_runtime = FALSE
-)
-
-setwd(old_wd)
-unlink(tmp, recursive = TRUE)
+    tinytrail(
+      description    = "Sources and runs all project scripts in order",
+      pin_to_top     = TRUE,
+      record_runtime = FALSE,
+      name           = "main.R"
+    )
+  })
+})
 }
 }

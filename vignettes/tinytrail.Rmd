@@ -8,7 +8,11 @@ vignette: >
 ---
 
 ```{r setup, include = FALSE}
-knitr::opts_chunk$set(collapse = TRUE, comment = "#>", eval = FALSE)
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+```{r load}
+library(tinytrail)
 ```
 
 `tinytrail` is a package that — once initialised — leaves a 'tiny trail' of
@@ -29,9 +33,7 @@ stays current automatically.
 
 ## A minimal workflow
 
-```{r workflow}
-library(tinytrail)
-
+```{r workflow, eval=FALSE}
 # --- top of 01_clean.R ---
 tinytrail(
   description = "Clean and reshape survey data",
@@ -53,7 +55,7 @@ write.csv(
 so it slots directly into the `file =` argument of any write function. It works
 equally well with `here::here()`:
 
-```{r here}
+```{r here, eval=FALSE}
 write.csv(
   survey,
   file = tinytrail_write(here::here("data/clean/survey_clean.csv"))
@@ -104,7 +106,7 @@ data_dictionary:
 
 Pin an important script to the top of the trail:
 
-```{r pin}
+```{r pin, eval=FALSE}
 tinytrail(
   description = "Master data preparation",
   data_source = "Admin registry (Statistics Sweden)",

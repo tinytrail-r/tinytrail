@@ -35,14 +35,14 @@ Requires \code{tinytrail()} to have been called first in the same session.
 }
 \examples{
 \donttest{
-tmp <- tempfile()
-dir.create(tmp)
-writeLines("Version: 1.0", file.path(tmp, "DESCRIPTION"))
-old_wd <- setwd(tmp)
-options(.tinytrail_registry_path = NULL, .tinytrail_current_script = NULL)
-tinytrail("raw/data.csv", "example script", name = "script.R", record_runtime = FALSE)
-dat <- mtcars |> tinytrail_dict(.name = "cars")
-setwd(old_wd)
-unlink(tmp, recursive = TRUE)
+withr::with_tempdir({
+  writeLines("Version: 1.0", "DESCRIPTION")
+  withr::with_options(
+    list(.tinytrail_registry_path = NULL, .tinytrail_current_script = NULL), {
+
+    tinytrail("Analyse mtcars", name = "analysis.R", record_runtime = FALSE)
+    dat <- mtcars |> tinytrail_dict(.name = "cars")
+  })
+})
 }
 }
