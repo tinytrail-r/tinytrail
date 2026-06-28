@@ -29,9 +29,7 @@
 .read_or_init_registry <- function(path) {
   if (file.exists(path)) return(yaml::read_yaml(path))
   list(
-    `$version`    = .TINYTRAIL_VERSION,
-    `$learn_more` = .TINYTRAIL_URL,
-    scripts       = list()
+    scripts = list()
   )
 }
 
