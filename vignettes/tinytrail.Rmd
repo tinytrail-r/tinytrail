@@ -15,45 +15,46 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 library(tinytrail)
 ```
 
-`tinytrail` is a package that — once initialised — leaves a 'tiny trail' of
-human- and AI-readable text that makes it effortless to keep track of small to
-medium-sized projects. The package is lightweight (hence 'tiny') and ...
+`tinytrail` is a package that — once initialized — leaves a 'tiny trail' of
+human- and AI-readable log-entries in a `yaml` that makes it effortless to keep
+track of small to medium-sized projects. The package is lightweight (hence
+'tiny') and maintains a YAML trail file recording which scripts produced which
+output files.
 
-`tinytrail` keeps a YAML registry of which scripts produced which output files
-in your project. Place three lightweight calls in each script and the registry
-stays current automatically.
+## The two core functions
 
-## The three functions
+Place two calls in every script and the trail stays current automatically.
 
 | Function | Where to use it |
 |---|---|
-| `tinytrail()` | Top of every script |
+| `tinytrail()` | Once, near the top of every script |
 | `tinytrail_write()` | Inline around any file path you save to |
-| `tinytrail_dict()` | After reading/cleaning a data frame |
 
-## A minimal workflow
+Call `tinytrail()` once at the top of each script with a short description of
+what the script does:
 
-```{r workflow, eval=FALSE}
+```{r core, eval=FALSE}
+library(tinytrail)
+
 # --- top of 01_clean.R ---
 tinytrail(
   description = "Clean and reshape survey data",
   data_source = "Current Population Survey (BLS)"
 )
+```
 
-# read and clean
-survey <- read.csv("data/raw/survey.csv") |>
-  tinytrail_dict()                           # records column names + samples
+Then wrap the file path argument of any save call with `tinytrail_write()`.
+It logs the path and returns it unchanged, so it slots directly into the
+`file =` argument of any write function:
 
-# save — wrap the file path with tinytrail_write()
+```{r write, eval=FALSE}
 write.csv(
   survey,
   file = tinytrail_write("data/clean/survey_clean.csv")
 )
 ```
 
-`tinytrail_write()` is a thin wrapper that logs the path and returns it unchanged,
-so it slots directly into the `file =` argument of any write function. It works
-equally well with `here::here()`:
+It works equally well with `here::here()`:
 
 ```{r here, eval=FALSE}
 write.csv(
@@ -62,13 +63,8 @@ write.csv(
 )
 ```
 
-That is all you need to add. The trail file (`_tinytrail.yaml`) is
-created in the project root on the first run and updated on every subsequent
-run.
-
-## The trail file
-
-After running a few scripts, `_tinytrail.yaml` looks like this:
+That is all you need to add. The trail file (`_tinytrail.yaml`) is created in
+the project root on the first run and updated on every subsequent run:
 
 ```yaml
 $version: 0.1.0
@@ -93,6 +89,22 @@ scripts:
     outputs:
     - results/model_fit.rds
     - results/table_coefficients.csv
+```
+
+## Adding a data dictionary
+
+`tinytrail_dict()` is an optional third function. Place it at the end of a
+read or clean pipeline to capture column names and sample values for each input
+data frame:
+
+```{r dict, eval=FALSE}
+survey <- read.csv("data/raw/survey.csv") |>
+  tinytrail_dict()
+```
+
+The entry is stored under the calling script in the trail file:
+
+```yaml
 data_dictionary:
   01_clean.R:
     survey:
@@ -102,9 +114,17 @@ data_dictionary:
         response: ['yes', 'no', 'yes', 'yes', 'no']
 ```
 
+To omit sample values and record only column names, use `sample_values = FALSE`:
+
+```{r dict-no-samples, eval=FALSE}
+survey <- read.csv("data/raw/survey.csv") |>
+  tinytrail_dict(sample_values = FALSE)
+```
+
 ## Options
 
-Pin an important script to the top of the trail:
+Pin an important script to the top of the trail — useful for a `main.R` that
+sources other scripts:
 
 ```{r pin, eval=FALSE}
 tinytrail(

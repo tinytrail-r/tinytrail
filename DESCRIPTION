@@ -3,7 +3,7 @@ Title: Lightweight Auto-updating Project Tracker and Data Dictionary
 Version: 0.1.0
 Authors@R:
     person("Tomas", "Reivinger", , "tomas.reivinger@gmail.com", role = c("aut", "cre", "cph"))
-Description: Once initialised, leaves a 'tiny trail' of human- and AI-readable
+Description: Once initialized, leaves a 'tiny trail' of human- and AI-readable
     text that makes it effortless to keep track of small to medium-sized
     projects. The package is lightweight (hence 'tiny') and maintains a YAML
     trail file recording which scripts produced which output files. Call
