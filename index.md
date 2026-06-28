@@ -71,6 +71,23 @@ scripts:
     - output/tab1.tex
 ```
 
+**How does the capturing work?**
+[`tinytrail()`](https://tinytrail-r.github.io/tinytrail/reference/tinytrail.md)
+uses R’s built-in [`trace()`](https://rdrr.io/r/base/trace.html)
+mechanism to temporarily observe common write functions —
+[`write.csv()`](https://rdrr.io/r/utils/write.table.html),
+[`saveRDS()`](https://rdrr.io/r/base/readRDS.html),
+`readr::write_csv()`, `ggplot2::ggsave()`, and more — for the duration
+of the script. When one of these is called, the file path is quietly
+noted before the function runs as normal. No behaviour is changed and no
+files are modified. The hooks are removed automatically when the script
+exits, leaving your R session exactly as it was. For write functions not
+in the built-in list,
+[`tinytrail()`](https://tinytrail-r.github.io/tinytrail/reference/tinytrail.md)
+accepts an `extra_hooks` argument, or you can fall back to wrapping the
+path manually with
+[`tinytrail_write()`](https://tinytrail-r.github.io/tinytrail/reference/tinytrail_write.md).
+
 Since
 [`tinytrail_write()`](https://tinytrail-r.github.io/tinytrail/reference/tinytrail_write.md)
 is just a thin wrapper
