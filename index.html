@@ -101,7 +101,10 @@
 <span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> output/fig1.tex</span></span>
 <span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> output/tab1.tex</span></span></code></pre></div>
 <p>Since <code><a href="reference/tinytrail_write.html">tinytrail_write()</a></code> is just a thin wrapper</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="at">ggsave(file = tinytrail_write("output/tab1.tex"))</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="at">ggsave(</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="at">file = tinytrail_write(</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="at">here::here("output/tab1.tex")</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="at">))</span></span></code></pre></div>
 <p>works as expected.</p>
 <p>Optionally, pipe data frames through <code><a href="reference/tinytrail_dict.html">tinytrail_dict()</a></code> to capture column names and sample values:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">

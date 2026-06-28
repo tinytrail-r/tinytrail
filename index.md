@@ -76,7 +76,10 @@ Since
 is just a thin wrapper
 
 ``` yaml
-ggsave(file = tinytrail_write("output/tab1.tex"))
+ggsave(
+file = tinytrail_write(
+here::here("output/tab1.tex")
+))
 ```
 
 works as expected.
