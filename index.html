@@ -50,7 +50,7 @@
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="tinytrail">tinytrail<a class="anchor" aria-label="anchor" href="#tinytrail"></a>
 </h1></div>
-<p><strong>tinytrail</strong> is a lightweight R package that — once initialized — leaves a ‘tiny trail’ of human- and AI-readable text, making it effortless to keep track of small to medium-sized projects. It maintains a YAML trail file (<code>_tinytrail.yaml</code>) at the project root recording which scripts produced which output files.</p>
+<p><strong>tinytrail</strong> is a lightweight R package that — once initialized — leaves a ‘tiny trail’ of human- and AI-readable log of outputs, making it effortless to keep betetr track of small to medium-sized projects. It maintains a YAML trail file (<code>_tinytrail.yaml</code>) at the project root recording which scripts produced which output files.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -65,31 +65,45 @@
 <p>Place <code><a href="reference/tinytrail.html">tinytrail()</a></code> once near the top of each script and wrap save calls with <code><a href="reference/tinytrail_write.html">tinytrail_write()</a></code>:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tinytrail-r/tinytrail" class="external-link">tinytrail</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://vincentarelbundock.github.io/tinytable/" class="external-link">tinytable</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="reference/tinytrail.html">tinytrail</a></span><span class="op">(</span></span>
-<span>  description <span class="op">=</span> <span class="st">"Clean and reshape survey data"</span>,</span>
+<span>  description <span class="op">=</span> <span class="st">"Summarise survey responses by age group"</span>,</span>
 <span>  data_source <span class="op">=</span> <span class="st">"Current Population Survey (BLS)"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># ... processing ...</span></span>
+<span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"data/raw/survey.csv"</span><span class="op">)</span> </span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/write.table.html" class="external-link">write.csv</a></span><span class="op">(</span><span class="va">dat</span>, file <span class="op">=</span> <span class="fu"><a href="reference/tinytrail_write.html">tinytrail_write</a></span><span class="op">(</span><span class="st">"data/clean/survey_clean.csv"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># ... analysis ...</span></span>
+<span></span>
+<span><span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">dat</span>, <span class="fu">aes</span><span class="op">(</span>x <span class="op">=</span> <span class="va">age</span>, fill <span class="op">=</span> <span class="va">response</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu">geom_histogram</span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">plot</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu">ggsave</span><span class="op">(</span>file <span class="op">=</span> <span class="fu"><a href="reference/tinytrail_write.html">tinytrail_write</a></span><span class="op">(</span><span class="st">"output/fig1.tex"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">age</span> <span class="op">~</span> <span class="va">response</span>, data <span class="op">=</span> <span class="va">dat</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">tt</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span><span class="op">)</span>, digits <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu">save_tt</span><span class="op">(</span>file <span class="op">=</span> <span class="fu"><a href="reference/tinytrail_write.html">tinytrail_write</a></span><span class="op">(</span><span class="st">"output/tab1.tex"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>This creates or updates <code>_tinytrail.yaml</code>:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">$version</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.1.0</span></span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">$learn_more</span><span class="kw">:</span><span class="at"> https://github.com/tinytrail-r/tinytrail</span></span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="fu">scripts</span><span class="kw">:</span></span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="at">  </span><span class="fu">01_clean.R</span><span class="kw">:</span></span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="at">    </span><span class="fu">description</span><span class="kw">:</span><span class="at"> Clean and reshape survey data</span></span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="at">    </span><span class="fu">data_source</span><span class="kw">:</span><span class="at"> Current Population Survey (BLS)</span></span>
-<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="at">    </span><span class="fu">first_run</span><span class="kw">:</span><span class="at"> </span><span class="st">'2026-06-27 09:00'</span></span>
-<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="at">    </span><span class="fu">latest_run</span><span class="kw">:</span><span class="at"> </span><span class="st">'2026-06-27 09:01'</span></span>
-<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="at">    </span><span class="fu">script_runtime</span><span class="kw">:</span><span class="at"> 0.1 min</span></span>
-<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="at">    </span><span class="fu">n_outputs</span><span class="kw">:</span><span class="at"> </span><span class="dv">1</span></span>
-<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="at">    </span><span class="fu">outputs</span><span class="kw">:</span></span>
-<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> data/clean/survey_clean.csv</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">scripts</span><span class="kw">:</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="at">  </span><span class="fu">01_clean.R</span><span class="kw">:</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="at">    </span><span class="fu">description</span><span class="kw">:</span><span class="at"> Summarise survey responses by age group</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="at">    </span><span class="fu">data_source</span><span class="kw">:</span><span class="at"> Current Population Survey (BLS)</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="at">    </span><span class="fu">first_run</span><span class="kw">:</span><span class="at"> </span><span class="st">'2026-06-27 09:00'</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="at">    </span><span class="fu">latest_run</span><span class="kw">:</span><span class="at"> </span><span class="st">'2026-06-27 09:01'</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="at">    </span><span class="fu">script_runtime</span><span class="kw">:</span><span class="at"> 0.2 min</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="at">    </span><span class="fu">n_outputs</span><span class="kw">:</span><span class="at"> </span><span class="dv">2</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="at">    </span><span class="fu">outputs</span><span class="kw">:</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> output/fig1.tex</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> output/tab1.tex</span></span></code></pre></div>
 <p>Optionally, pipe data frames through <code><a href="reference/tinytrail_dict.html">tinytrail_dict()</a></code> to capture column names and sample values:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">dat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"data/raw/survey.csv"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<code class="sourceCode R"><span><span class="co"># ... cleaning and preparing data ...</span></span>
+<span></span>
+<span><span class="va">dat</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/tinytrail_dict.html">tinytrail_dict</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>This adds a data dictionary entry to <code>_tinytrail.yaml</code>:</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">data_dictionary</span><span class="kw">:</span></span>

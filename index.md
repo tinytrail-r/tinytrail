@@ -1,10 +1,10 @@
 # tinytrail
 
 **tinytrail** is a lightweight R package that — once initialized —
-leaves a ‘tiny trail’ of human- and AI-readable text, making it
-effortless to keep track of small to medium-sized projects. It maintains
-a YAML trail file (`_tinytrail.yaml`) at the project root recording
-which scripts produced which output files.
+leaves a ‘tiny trail’ of human- and AI-readable log of outputs, making
+it effortless to keep betetr track of small to medium-sized projects. It
+maintains a YAML trail file (`_tinytrail.yaml`) at the project root
+recording which scripts produced which output files.
 
 ## Installation
 
@@ -25,32 +25,44 @@ once near the top of each script and wrap save calls with
 ``` r
 
 library(tinytrail)
+library(ggplot2)
+library(tinytable)
 
 tinytrail(
-  description = "Clean and reshape survey data",
+  description = "Summarise survey responses by age group",
   data_source = "Current Population Survey (BLS)"
 )
 
-# ... processing ...
+dat <- read.csv("data/raw/survey.csv") 
 
-write.csv(dat, file = tinytrail_write("data/clean/survey_clean.csv"))
+# ... analysis ...
+
+plot <- ggplot(dat, aes(x = age, fill = response)) +
+  geom_histogram()
+
+plot |> 
+  ggsave(file = tinytrail_write("output/fig1.tex"))
+
+fit <- lm(age ~ response, data = dat)
+
+tt(coef(summary(fit)), digits = 3) |>
+  save_tt(file = tinytrail_write("output/tab1.tex"))
 ```
 
 This creates or updates `_tinytrail.yaml`:
 
 ``` yaml
-$version: 0.1.0
-$learn_more: https://github.com/tinytrail-r/tinytrail
 scripts:
   01_clean.R:
-    description: Clean and reshape survey data
+    description: Summarise survey responses by age group
     data_source: Current Population Survey (BLS)
     first_run: '2026-06-27 09:00'
     latest_run: '2026-06-27 09:01'
-    script_runtime: 0.1 min
-    n_outputs: 1
+    script_runtime: 0.2 min
+    n_outputs: 2
     outputs:
-    - data/clean/survey_clean.csv
+    - output/fig1.tex
+    - output/tab1.tex
 ```
 
 Optionally, pipe data frames through
@@ -59,7 +71,9 @@ to capture column names and sample values:
 
 ``` r
 
-dat <- read.csv("data/raw/survey.csv") |>
+# ... cleaning and preparing data ...
+
+dat |>
   tinytrail_dict()
 ```
 
