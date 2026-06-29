@@ -88,12 +88,12 @@
 #' @param auto Logical. Automatically intercept common write functions and
 #'   record their output paths. Default `TRUE`. Set to `FALSE` to use explicit
 #'   `tinytrail_write()` calls instead.
-#' @param extra_hooks Named character vector of additional write functions to
-#'   intercept when `auto = TRUE`. Names are function identifiers (`"fn"` for a
-#'   function defined in the script, or `"pkg::fn"` for a package function),
-#'   values are the name of the file-path argument in that function. Example:
-#'   `c(my_save = "path", "sf::st_write" = "dsn")`. Functions from packages
-#'   that are not installed are silently skipped.
+#' @param extra_hooks A `data.frame` with columns `fn` and `arg` specifying
+#'   additional write functions to intercept when `auto = TRUE`. `fn` is the
+#'   function name (`"my_save"` for a script-level function, or `"pkg::fn"`
+#'   for a package function). `arg` is the name of the file-path argument in
+#'   that function. Functions from packages that are not installed are silently
+#'   skipped.
 #'
 #' @returns `name` (the script name), invisibly. Called for its side effect of
 #'   creating or updating the YAML trail file in the project root.
@@ -115,6 +115,14 @@
 #'       name           = "clean.R"
 #'     )
 #'     write.csv(mtcars, "cars.csv")
+#'
+#'     # extra_hooks: add a function not in the built-in list
+#'     tinytrail(
+#'       description    = "Export final tables",
+#'       record_runtime = FALSE,
+#'       name           = "export.R",
+#'       extra_hooks    = data.frame(fn = "tinytable::save_tt", arg = "output")
+#'     )
 #'
 #'     # auto = FALSE: use explicit tinytrail_write() wrappers
 #'     tinytrail(

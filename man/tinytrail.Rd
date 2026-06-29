@@ -34,12 +34,12 @@ testing or when auto-detection is not available.}
 record their output paths. Default \code{TRUE}. Set to \code{FALSE} to use explicit
 \code{tinytrail_write()} calls instead.}
 
-\item{extra_hooks}{Named character vector of additional write functions to
-intercept when \code{auto = TRUE}. Names are function identifiers (\code{"fn"} for a
-function defined in the script, or \code{"pkg::fn"} for a package function),
-values are the name of the file-path argument in that function. Example:
-\code{c(my_save = "path", "sf::st_write" = "dsn")}. Functions from packages
-that are not installed are silently skipped.}
+\item{extra_hooks}{A \code{data.frame} with columns \code{fn} and \code{arg} specifying
+additional write functions to intercept when \code{auto = TRUE}. \code{fn} is the
+function name (\code{"my_save"} for a script-level function, or \code{"pkg::fn"}
+for a package function). \code{arg} is the name of the file-path argument in
+that function. Functions from packages that are not installed are silently
+skipped.}
 }
 \value{
 \code{name} (the script name), invisibly. Called for its side effect of
@@ -71,6 +71,14 @@ withr::with_tempdir({
       name           = "clean.R"
     )
     write.csv(mtcars, "cars.csv")
+
+    # extra_hooks: add a function not in the built-in list
+    tinytrail(
+      description    = "Export final tables",
+      record_runtime = FALSE,
+      name           = "export.R",
+      extra_hooks    = data.frame(fn = "tinytable::save_tt", arg = "output")
+    )
 
     # auto = FALSE: use explicit tinytrail_write() wrappers
     tinytrail(

@@ -64,9 +64,10 @@
 .setup_write_hooks <- function(extra = NULL) {
   hooks <- .WRITE_HOOKS
   if (!is.null(extra)) {
-    parsed <- Map(.parse_hook_spec, names(extra), extra)
-    for (spec in parsed)
+    for (i in seq_len(nrow(extra))) {
+      spec <- .parse_hook_spec(extra$fn[i], extra$arg[i])
       hooks[[paste0(spec$pkg %||% "global", "::", spec$fn)]] <- spec
+    }
   }
 
   traced <- character(0)
