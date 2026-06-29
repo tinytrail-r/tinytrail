@@ -188,9 +188,10 @@ tinytrail <- function(description,
 
   if (auto) {
     .setup_write_hooks(extra = extra_hooks)
+    teardown_ <- .teardown_write_hooks
     do.call(
       on.exit,
-      list(quote(.teardown_write_hooks()), add = TRUE, after = TRUE),
+      list(bquote((.(teardown_))()), add = TRUE, after = TRUE),
       envir = parent.frame()
     )
   }
