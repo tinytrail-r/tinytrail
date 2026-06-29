@@ -65,18 +65,22 @@ dropped inline into any save function.</p>
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Requires <code><a href="tinytrail.html">tinytrail()</a></code> to have been called first in the same session.</p>
     </div>
+    <div class="section level2">
+    <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
+    <div class="dont-index"><p><code><a href="tinytrail.html">tinytrail()</a></code> to initialise the trail, <code><a href="tinytrail_dict.html">tinytrail_dict()</a></code> to
+capture a data dictionary.</p></div>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="fu">withr</span><span class="fu">::</span><span class="fu"><a href="https://withr.r-lib.org/reference/with_tempfile.html" class="external-link">with_tempdir</a></span><span class="op">(</span><span class="op">{</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/writeLines.html" class="external-link">writeLines</a></span><span class="op">(</span><span class="st">"Version: 1.0"</span>, <span class="st">"DESCRIPTION"</span><span class="op">)</span></span></span>
-<span class="r-in"><span>  <span class="fu">withr</span><span class="fu">::</span><span class="fu"><a href="https://withr.r-lib.org/reference/with_options.html" class="external-link">with_options</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>.tinytrail_registry_path <span class="op">=</span> <span class="cn">NULL</span>, .tinytrail_current_script <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>, <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/writeLines.html" class="external-link">writeLines</a></span><span class="op">(</span><span class="st">"Package: testproject\nVersion: 0.1.0"</span>, <span class="st">"DESCRIPTION"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="tinytrail.html">tinytrail</a></span><span class="op">(</span><span class="st">"Process raw data"</span>, name <span class="op">=</span> <span class="st">"analysis.R"</span>, record_runtime <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
-<span class="r-in"><span>    <span class="va">out</span> <span class="op">&lt;-</span> <span class="fu">tinytrail_write</span><span class="op">(</span><span class="st">"output/results.csv"</span><span class="op">)</span></span></span>
-<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="tinytrail.html">tinytrail</a></span><span class="op">(</span><span class="st">"Process raw data"</span>, name <span class="op">=</span> <span class="st">"analysis.R"</span>, record_runtime <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>            auto <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/utils/write.table.html" class="external-link">write.csv</a></span><span class="op">(</span><span class="va">mtcars</span>, <span class="fu">tinytrail_write</span><span class="op">(</span><span class="st">"clean.csv"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">saveRDS</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">wt</span>, <span class="va">mtcars</span><span class="op">)</span>, <span class="fu">tinytrail_write</span><span class="op">(</span><span class="st">"model.rds"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>

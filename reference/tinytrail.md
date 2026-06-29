@@ -42,8 +42,9 @@ tinytrail(
 
 - name:
 
-  Character. Override the auto-detected script name. Useful in testing
-  or when auto-detection is not available.
+  Character. Override the auto-detected script name. Intended for use in
+  tests and non-standard execution environments where auto-detection is
+  unavailable.
 
 - auto:
 
@@ -79,42 +80,30 @@ wrapper. Set `auto = FALSE` to use explicit
 [`tinytrail_write()`](https://tinytrail-r.github.io/tinytrail/reference/tinytrail_write.md)
 calls instead.
 
+## See also
+
+[`tinytrail_write()`](https://tinytrail-r.github.io/tinytrail/reference/tinytrail_write.md)
+to record output paths explicitly,
+[`tinytrail_dict()`](https://tinytrail-r.github.io/tinytrail/reference/tinytrail_dict.md)
+to capture a data dictionary.
+
 ## Examples
 
 ``` r
 # \donttest{
 withr::with_tempdir({
-  writeLines("Version: 1.0", "DESCRIPTION")
-  withr::with_options(
-    list(.tinytrail_registry_path = NULL, .tinytrail_current_script = NULL,
-         .tinytrail_traced_fns = NULL, .tinytrail_hooks_table = NULL), {
+  writeLines("Package: testproject\nVersion: 0.1.0", "DESCRIPTION")
 
-    # auto = TRUE (default): write.csv captured without tinytrail_write()
-    tinytrail(
-      description    = "Clean and reshape survey data",
-      data_source    = "Current Population Survey (BLS)",
-      record_runtime = FALSE,
-      name           = "clean.R"
-    )
-    write.csv(mtcars, "cars.csv")
-
-    # extra_hooks: add a function not in the built-in list
-    tinytrail(
-      description    = "Export final tables",
-      record_runtime = FALSE,
-      name           = "export.R",
-      extra_hooks    = list(fn = "tinytable::save_tt", arg = "output")
-    )
-
-    # auto = FALSE: use explicit tinytrail_write() wrappers
-    tinytrail(
-      description    = "Sources and runs all project scripts in order",
-      pin_to_top     = TRUE,
-      record_runtime = FALSE,
-      auto           = FALSE,
-      name           = "main.R"
-    )
-  })
+  tinytrail(
+    description    = "Clean and summarise survey data",
+    data_source    = "Current Population Survey (BLS)",
+    record_runtime = FALSE,
+    name           = "clean.R"
+  )
+  write.csv(mtcars, "clean.csv")
+  png("age_dist.png"); hist(mtcars$mpg, main = "MPG"); dev.off()
 })
+#> agg_record_197c79f64314 
+#>                       2 
 # }
 ```

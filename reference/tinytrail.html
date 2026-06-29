@@ -79,8 +79,9 @@ for a <code>main.R</code> that sources other scripts — keeps it visible at the
 
 
 <dt id="arg-name">name<a class="anchor" aria-label="anchor" href="#arg-name"></a></dt>
-<dd><p>Character. Override the auto-detected script name. Useful in
-testing or when auto-detection is not available.</p></dd>
+<dd><p>Character. Override the auto-detected script name. Intended for
+use in tests and non-standard execution environments where auto-detection
+is unavailable.</p></dd>
 
 
 <dt id="arg-auto">auto<a class="anchor" aria-label="anchor" href="#arg-auto"></a></dt>
@@ -110,43 +111,29 @@ creating or updating the YAML trail file in the project root.</p>
 their output file paths are captured without any <code><a href="tinytrail_write.html">tinytrail_write()</a></code> wrapper.
 Set <code>auto = FALSE</code> to use explicit <code><a href="tinytrail_write.html">tinytrail_write()</a></code> calls instead.</p>
     </div>
+    <div class="section level2">
+    <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
+    <div class="dont-index"><p><code><a href="tinytrail_write.html">tinytrail_write()</a></code> to record output paths explicitly,
+<code><a href="tinytrail_dict.html">tinytrail_dict()</a></code> to capture a data dictionary.</p></div>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="fu">withr</span><span class="fu">::</span><span class="fu"><a href="https://withr.r-lib.org/reference/with_tempfile.html" class="external-link">with_tempdir</a></span><span class="op">(</span><span class="op">{</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/writeLines.html" class="external-link">writeLines</a></span><span class="op">(</span><span class="st">"Version: 1.0"</span>, <span class="st">"DESCRIPTION"</span><span class="op">)</span></span></span>
-<span class="r-in"><span>  <span class="fu">withr</span><span class="fu">::</span><span class="fu"><a href="https://withr.r-lib.org/reference/with_options.html" class="external-link">with_options</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>.tinytrail_registry_path <span class="op">=</span> <span class="cn">NULL</span>, .tinytrail_current_script <span class="op">=</span> <span class="cn">NULL</span>,</span></span>
-<span class="r-in"><span>         .tinytrail_traced_fns <span class="op">=</span> <span class="cn">NULL</span>, .tinytrail_hooks_table <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>, <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/writeLines.html" class="external-link">writeLines</a></span><span class="op">(</span><span class="st">"Package: testproject\nVersion: 0.1.0"</span>, <span class="st">"DESCRIPTION"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span>    <span class="co"># auto = TRUE (default): write.csv captured without tinytrail_write()</span></span></span>
-<span class="r-in"><span>    <span class="fu">tinytrail</span><span class="op">(</span></span></span>
-<span class="r-in"><span>      description    <span class="op">=</span> <span class="st">"Clean and reshape survey data"</span>,</span></span>
-<span class="r-in"><span>      data_source    <span class="op">=</span> <span class="st">"Current Population Survey (BLS)"</span>,</span></span>
-<span class="r-in"><span>      record_runtime <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
-<span class="r-in"><span>      name           <span class="op">=</span> <span class="st">"clean.R"</span></span></span>
-<span class="r-in"><span>    <span class="op">)</span></span></span>
-<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/r/utils/write.table.html" class="external-link">write.csv</a></span><span class="op">(</span><span class="va">mtcars</span>, <span class="st">"cars.csv"</span><span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span>    <span class="co"># extra_hooks: add a function not in the built-in list</span></span></span>
-<span class="r-in"><span>    <span class="fu">tinytrail</span><span class="op">(</span></span></span>
-<span class="r-in"><span>      description    <span class="op">=</span> <span class="st">"Export final tables"</span>,</span></span>
-<span class="r-in"><span>      record_runtime <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
-<span class="r-in"><span>      name           <span class="op">=</span> <span class="st">"export.R"</span>,</span></span>
-<span class="r-in"><span>      extra_hooks    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>fn <span class="op">=</span> <span class="st">"tinytable::save_tt"</span>, arg <span class="op">=</span> <span class="st">"output"</span><span class="op">)</span></span></span>
-<span class="r-in"><span>    <span class="op">)</span></span></span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span>    <span class="co"># auto = FALSE: use explicit tinytrail_write() wrappers</span></span></span>
-<span class="r-in"><span>    <span class="fu">tinytrail</span><span class="op">(</span></span></span>
-<span class="r-in"><span>      description    <span class="op">=</span> <span class="st">"Sources and runs all project scripts in order"</span>,</span></span>
-<span class="r-in"><span>      pin_to_top     <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>      record_runtime <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
-<span class="r-in"><span>      auto           <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
-<span class="r-in"><span>      name           <span class="op">=</span> <span class="st">"main.R"</span></span></span>
-<span class="r-in"><span>    <span class="op">)</span></span></span>
-<span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu">tinytrail</span><span class="op">(</span></span></span>
+<span class="r-in"><span>    description    <span class="op">=</span> <span class="st">"Clean and summarise survey data"</span>,</span></span>
+<span class="r-in"><span>    data_source    <span class="op">=</span> <span class="st">"Current Population Survey (BLS)"</span>,</span></span>
+<span class="r-in"><span>    record_runtime <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>    name           <span class="op">=</span> <span class="st">"clean.R"</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/utils/write.table.html" class="external-link">write.csv</a></span><span class="op">(</span><span class="va">mtcars</span>, <span class="st">"clean.csv"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/grDevices/png.html" class="external-link">png</a></span><span class="op">(</span><span class="st">"age_dist.png"</span><span class="op">)</span>; <span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">$</span><span class="va">mpg</span>, main <span class="op">=</span> <span class="st">"MPG"</span><span class="op">)</span>; <span class="fu"><a href="https://rdrr.io/r/grDevices/dev.html" class="external-link">dev.off</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> agg_record_197c79f64314 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                       2 </span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
