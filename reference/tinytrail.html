@@ -106,7 +106,7 @@ creating or updating the YAML trail file in the project root.</p>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>By default (<code>auto = TRUE</code>) common write functions (<code>write.csv</code>, <code>saveRDS</code>,
-<code>readr::write_csv</code>, <code>ggplot2::ggsave</code>, etc.) are hooked automatically so
+<code><a href="https://readr.tidyverse.org/reference/write_delim.html" class="external-link">readr::write_csv</a></code>, <code><a href="https://ggplot2.tidyverse.org/reference/ggsave.html" class="external-link">ggplot2::ggsave</a></code>, etc.) are hooked automatically so
 their output file paths are captured without any <code><a href="tinytrail_write.html">tinytrail_write()</a></code> wrapper.
 Set <code>auto = FALSE</code> to use explicit <code><a href="tinytrail_write.html">tinytrail_write()</a></code> calls instead.</p>
     </div>
@@ -147,6 +147,9 @@ Set <code>auto = FALSE</code> to use explicit <code><a href="tinytrail_write.htm
 <span class="r-in"><span>    <span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="op">}</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>RGL: unable to open X11 display</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>'rgl.init' failed, will use the null device.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> See '?rgl.useNULL' for ways to avoid this warning.</span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>

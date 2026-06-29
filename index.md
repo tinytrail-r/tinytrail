@@ -77,13 +77,15 @@ uses R’s built-in [`trace()`](https://rdrr.io/r/base/trace.html)
 mechanism to temporarily observe common write functions —
 [`write.csv()`](https://rdrr.io/r/utils/write.table.html),
 [`saveRDS()`](https://rdrr.io/r/base/readRDS.html),
-`readr::write_csv()`, `ggplot2::ggsave()`, and more — for the duration
-of the script. When one of these is called, the file path is quietly
-noted before the function runs as normal. No behaviour is changed and no
-files are modified. The hooks are removed automatically when the script
-exits, leaving your R session exactly as it was. For write functions not
-in the built-in list, pass a `data.frame` to `extra_hooks` with the
-function name and its file-path argument:
+[`readr::write_csv()`](https://readr.tidyverse.org/reference/write_delim.html),
+[`ggplot2::ggsave()`](https://ggplot2.tidyverse.org/reference/ggsave.html),
+and more — for the duration of the script. When one of these is called,
+the file path is quietly noted before the function runs as normal. No
+behaviour is changed and no files are modified. The hooks are removed
+automatically when the script exits, leaving your R session exactly as
+it was. For write functions not in the built-in list, pass a
+`data.frame` to `extra_hooks` with the function name and its file-path
+argument:
 
 ``` r
 

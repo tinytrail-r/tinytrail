@@ -69,8 +69,11 @@ creating or updating the YAML trail file in the project root.
 ## Details
 
 By default (`auto = TRUE`) common write functions (`write.csv`,
-`saveRDS`, `readr::write_csv`, `ggplot2::ggsave`, etc.) are hooked
-automatically so their output file paths are captured without any
+`saveRDS`,
+[`readr::write_csv`](https://readr.tidyverse.org/reference/write_delim.html),
+[`ggplot2::ggsave`](https://ggplot2.tidyverse.org/reference/ggsave.html),
+etc.) are hooked automatically so their output file paths are captured
+without any
 [`tinytrail_write()`](https://tinytrail-r.github.io/tinytrail/reference/tinytrail_write.md)
 wrapper. Set `auto = FALSE` to use explicit
 [`tinytrail_write()`](https://tinytrail-r.github.io/tinytrail/reference/tinytrail_write.md)
@@ -113,5 +116,8 @@ withr::with_tempdir({
     )
   })
 })
+#> Warning: RGL: unable to open X11 display
+#> Warning: 'rgl.init' failed, will use the null device.
+#> See '?rgl.useNULL' for ways to avoid this warning.
 # }
 ```
