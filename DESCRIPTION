@@ -3,7 +3,7 @@ Title: Lightweight Auto-Updating Project Tracker and Data Dictionary
 Version: 0.1.0
 Authors@R:
     person("Tomas", "Reivinger", , "tomas.reivinger@gmail.com", role = c("aut", "cre", "cph"))
-Description: Once initialized, leaves a 'tiny trail' of human- and AI-readable
+Description: Once initialized, the package leaves a 'tiny trail' of human- and AI-readable
     text that makes it effortless to keep track of small to medium-sized
     projects. The package is lightweight (hence 'tiny') and maintains a YAML
     trail file recording which scripts produced which output files. Call
@@ -24,33 +24,19 @@ BugReports: https://github.com/tinytrail-r/tinytrail/issues
 Suggests:
     arrow,
     data.table,
-    fst,
     ggplot2,
     haven,
-    htmlwidgets,
-    imager,
     jsonlite,
     kableExtra,
     knitr,
-    leaflet,
-    magick,
-    officer,
     openxlsx,
-    openxlsx2,
     purrr,
     readr,
-    rgl,
     rmarkdown,
     rstudioapi,
-    rvg,
-    sf,
-    stars,
-    svglite,
-    terra,
     testthat (>= 3.0.0),
     tinytable,
     withr,
-    writexl,
-    xml2
+    writexl
 VignetteBuilder: knitr
 Config/testthat/edition: 3

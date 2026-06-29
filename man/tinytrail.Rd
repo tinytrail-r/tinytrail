@@ -27,8 +27,9 @@ for a \code{main.R} that sources other scripts — keeps it visible at the top o
 
 \item{record_runtime}{Logical. Record elapsed time on exit. Default \code{TRUE}.}
 
-\item{name}{Character. Override the auto-detected script name. Useful in
-testing or when auto-detection is not available.}
+\item{name}{Character. Override the auto-detected script name. Intended for
+use in tests and non-standard execution environments where auto-detection
+is unavailable.}
 
 \item{auto}{Logical. Automatically intercept common write functions and
 record their output paths. Default \code{TRUE}. Set to \code{FALSE} to use explicit
@@ -58,37 +59,20 @@ Set \code{auto = FALSE} to use explicit \code{tinytrail_write()} calls instead.
 \examples{
 \donttest{
 withr::with_tempdir({
-  writeLines("Version: 1.0", "DESCRIPTION")
-  withr::with_options(
-    list(.tinytrail_registry_path = NULL, .tinytrail_current_script = NULL,
-         .tinytrail_traced_fns = NULL, .tinytrail_hooks_table = NULL), {
+  writeLines("Package: testproject\nVersion: 0.1.0", "DESCRIPTION")
 
-    # auto = TRUE (default): write.csv captured without tinytrail_write()
-    tinytrail(
-      description    = "Clean and reshape survey data",
-      data_source    = "Current Population Survey (BLS)",
-      record_runtime = FALSE,
-      name           = "clean.R"
-    )
-    write.csv(mtcars, "cars.csv")
-
-    # extra_hooks: add a function not in the built-in list
-    tinytrail(
-      description    = "Export final tables",
-      record_runtime = FALSE,
-      name           = "export.R",
-      extra_hooks    = list(fn = "tinytable::save_tt", arg = "output")
-    )
-
-    # auto = FALSE: use explicit tinytrail_write() wrappers
-    tinytrail(
-      description    = "Sources and runs all project scripts in order",
-      pin_to_top     = TRUE,
-      record_runtime = FALSE,
-      auto           = FALSE,
-      name           = "main.R"
-    )
-  })
+  tinytrail(
+    description    = "Clean and summarise survey data",
+    data_source    = "Current Population Survey (BLS)",
+    record_runtime = FALSE,
+    name           = "clean.R"
+  )
+  write.csv(mtcars, "clean.csv")
+  png("age_dist.png"); hist(mtcars$mpg, main = "MPG"); dev.off()
 })
 }
+}
+\seealso{
+\code{\link[=tinytrail_write]{tinytrail_write()}} to record output paths explicitly,
+\code{\link[=tinytrail_dict]{tinytrail_dict()}} to capture a data dictionary.
 }

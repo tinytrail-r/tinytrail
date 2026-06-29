@@ -23,13 +23,16 @@ Requires \code{tinytrail()} to have been called first in the same session.
 \examples{
 \donttest{
 withr::with_tempdir({
-  writeLines("Version: 1.0", "DESCRIPTION")
-  withr::with_options(
-    list(.tinytrail_registry_path = NULL, .tinytrail_current_script = NULL), {
+  writeLines("Package: testproject\nVersion: 0.1.0", "DESCRIPTION")
 
-    tinytrail("Process raw data", name = "analysis.R", record_runtime = FALSE)
-    out <- tinytrail_write("output/results.csv")
-  })
+  tinytrail("Process raw data", name = "analysis.R", record_runtime = FALSE,
+            auto = FALSE)
+  write.csv(mtcars, tinytrail_write("clean.csv"))
+  saveRDS(lm(mpg ~ wt, mtcars), tinytrail_write("model.rds"))
 })
 }
+}
+\seealso{
+\code{\link[=tinytrail]{tinytrail()}} to initialise the trail, \code{\link[=tinytrail_dict]{tinytrail_dict()}} to
+capture a data dictionary.
 }

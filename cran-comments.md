@@ -1,13 +1,17 @@
-## R CMD check results
+── R CMD check results ──────────────────────────────────────────────────────── tinytrail 0.1.0 ────
+Duration: 26.4s
 
-0 errors | 0 warnings | 2 notes
+❯ checking CRAN incoming feasibility ... [2s/12s] NOTE
+  Maintainer: ‘Tomas Reivinger <tomas.reivinger@gmail.com>’
+  
+  New submission
 
-* checking CRAN incoming feasibility: New submission.
+❯ checking HTML version of manual ... NOTE
+  Skipping checking HTML validation: 'tidy' doesn't look like recent enough HTML Tidy.
+  Please obtain a recent version of HTML Tidy by downloading a binary
+  release or compiling the source code from <https://www.html-tidy.org/>.
 
-* checking HTML version of manual: NOTE about 'tidy' not being recent
-  enough for HTML validation. This is a local environment issue — the
-  system tidy binary is outdated. CRAN's servers have a recent tidy
-  installed and will not reproduce this note.
+0 errors ✔ | 0 warnings ✔ | 2 notes ✖
 
 ## Reverse dependencies
 

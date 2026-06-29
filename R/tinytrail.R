@@ -83,8 +83,9 @@
 #'   for a `main.R` that sources other scripts — keeps it visible at the top of
 #'   `_tinytrail.yaml` regardless of alphabetical order. Default `FALSE`.
 #' @param record_runtime Logical. Record elapsed time on exit. Default `TRUE`.
-#' @param name Character. Override the auto-detected script name. Useful in
-#'   testing or when auto-detection is not available.
+#' @param name Character. Override the auto-detected script name. Intended for
+#'   use in tests and non-standard execution environments where auto-detection
+#'   is unavailable.
 #' @param auto Logical. Automatically intercept common write functions and
 #'   record their output paths. Default `TRUE`. Set to `FALSE` to use explicit
 #'   `tinytrail_write()` calls instead.
@@ -97,42 +98,23 @@
 #'
 #' @returns `name` (the script name), invisibly. Called for its side effect of
 #'   creating or updating the YAML trail file in the project root.
+#' @seealso [tinytrail_write()] to record output paths explicitly,
+#'   [tinytrail_dict()] to capture a data dictionary.
 #' @export
 #'
 #' @examples
 #' \donttest{
 #' withr::with_tempdir({
-#'   writeLines("Version: 1.0", "DESCRIPTION")
-#'   withr::with_options(
-#'     list(.tinytrail_registry_path = NULL, .tinytrail_current_script = NULL,
-#'          .tinytrail_traced_fns = NULL, .tinytrail_hooks_table = NULL), {
+#'   writeLines("Package: testproject\nVersion: 0.1.0", "DESCRIPTION")
 #'
-#'     # auto = TRUE (default): write.csv captured without tinytrail_write()
-#'     tinytrail(
-#'       description    = "Clean and reshape survey data",
-#'       data_source    = "Current Population Survey (BLS)",
-#'       record_runtime = FALSE,
-#'       name           = "clean.R"
-#'     )
-#'     write.csv(mtcars, "cars.csv")
-#'
-#'     # extra_hooks: add a function not in the built-in list
-#'     tinytrail(
-#'       description    = "Export final tables",
-#'       record_runtime = FALSE,
-#'       name           = "export.R",
-#'       extra_hooks    = list(fn = "tinytable::save_tt", arg = "output")
-#'     )
-#'
-#'     # auto = FALSE: use explicit tinytrail_write() wrappers
-#'     tinytrail(
-#'       description    = "Sources and runs all project scripts in order",
-#'       pin_to_top     = TRUE,
-#'       record_runtime = FALSE,
-#'       auto           = FALSE,
-#'       name           = "main.R"
-#'     )
-#'   })
+#'   tinytrail(
+#'     description    = "Clean and summarise survey data",
+#'     data_source    = "Current Population Survey (BLS)",
+#'     record_runtime = FALSE,
+#'     name           = "clean.R"
+#'   )
+#'   write.csv(mtcars, "clean.csv")
+#'   png("age_dist.png"); hist(mtcars$mpg, main = "MPG"); dev.off()
 #' })
 #' }
 tinytrail <- function(description,
@@ -148,7 +130,7 @@ tinytrail <- function(description,
     return(invisible(NULL))
   }
 
-  registry_path <- .registry_path()
+  registry_path <- file.path(.find_root(), .REGISTRY_FILENAME)
   options(.tinytrail_registry_path = registry_path)
 
   registry <- .read_or_init_registry(registry_path)
@@ -214,18 +196,19 @@ tinytrail <- function(description,
 #' @param file Character. Path to the output file.
 #'
 #' @return `file`, invisibly.
+#' @seealso [tinytrail()] to initialise the trail, [tinytrail_dict()] to
+#'   capture a data dictionary.
 #' @export
 #'
 #' @examples
 #' \donttest{
 #' withr::with_tempdir({
-#'   writeLines("Version: 1.0", "DESCRIPTION")
-#'   withr::with_options(
-#'     list(.tinytrail_registry_path = NULL, .tinytrail_current_script = NULL), {
+#'   writeLines("Package: testproject\nVersion: 0.1.0", "DESCRIPTION")
 #'
-#'     tinytrail("Process raw data", name = "analysis.R", record_runtime = FALSE)
-#'     out <- tinytrail_write("output/results.csv")
-#'   })
+#'   tinytrail("Process raw data", name = "analysis.R", record_runtime = FALSE,
+#'             auto = FALSE)
+#'   write.csv(mtcars, tinytrail_write("clean.csv"))
+#'   saveRDS(lm(mpg ~ wt, mtcars), tinytrail_write("model.rds"))
 #' })
 #' }
 tinytrail_write <- function(file) {
@@ -278,30 +261,29 @@ tinytrail_write <- function(file) {
 #' Requires `tinytrail()` to have been called first in the same session.
 #'
 #' @param df A data frame.
-#' @param .name Character. Label for this entry. Defaults to the variable name of `df`
-#'   as written in the calling code (e.g. `mtcars |> tinytrail_dict()` records as `"mtcars"`).
-#'   Override when the expression is not a simple name or when you need a custom label.
+#' @param df_name Character. Label for this entry in the data dictionary.
+#'   Defaults to the variable name of `df` as written in the calling code
+#'   (e.g. `mtcars |> tinytrail_dict()` records as `"mtcars"`). Override when
+#'   the expression is not a simple name or when you need a custom label.
 #' @param sample_values Logical. Record 5 sample values per column. Default `TRUE`.
 #' @param sample_string_length Integer or `Inf`. Maximum characters per sample value
 #'   before truncating with `"..."`. Default `18L`.
 #'
 #' @return `df`, invisibly.
-
+#' @seealso [tinytrail()] to initialise the trail, [tinytrail_write()] to
+#'   record output paths explicitly.
 #' @export
 #'
 #' @examples
 #' \donttest{
 #' withr::with_tempdir({
-#'   writeLines("Version: 1.0", "DESCRIPTION")
-#'   withr::with_options(
-#'     list(.tinytrail_registry_path = NULL, .tinytrail_current_script = NULL), {
+#'   writeLines("Package: testproject\nVersion: 0.1.0", "DESCRIPTION")
 #'
-#'     tinytrail("Analyse mtcars", name = "analysis.R", record_runtime = FALSE)
-#'     dat <- mtcars |> tinytrail_dict(.name = "cars")
-#'   })
+#'   tinytrail("Analyse data", name = "analysis.R", record_runtime = FALSE)
+#'   dat <- mtcars |> tinytrail_dict(df_name = "cars")
 #' })
 #' }
-tinytrail_dict <- function(df, .name = NULL, sample_values = TRUE, sample_string_length = 18L) {
+tinytrail_dict <- function(df, df_name = NULL, sample_values = TRUE, sample_string_length = 18L) {
   script_name <- getOption(".tinytrail_current_script")
 
   if (is.null(script_name)) {
@@ -324,8 +306,8 @@ tinytrail_dict <- function(df, .name = NULL, sample_values = TRUE, sample_string
     registry$data_dictionary[[script_name]] <- list()
 
   auto_name <- deparse(substitute(df))
-  dict_name <- if (!is.null(.name)) {
-    .name
+  dict_name <- if (!is.null(df_name)) {
+    df_name
   } else if (grepl("^[A-Za-z._][A-Za-z0-9._]*$", auto_name)) {
     auto_name
   } else {
@@ -336,7 +318,7 @@ tinytrail_dict <- function(df, .name = NULL, sample_values = TRUE, sample_string
   if (!is.null(registry$data_dictionary[[script_name]][[dict_name]])) {
     warning(
       "tinytrail_dict(): '", dict_name, "' already recorded for '", script_name,
-      "' -- overwriting. Rename the data frame or use .name to distinguish stages.",
+      "' -- overwriting. Rename the data frame or use df_name to distinguish stages.",
       call. = FALSE
     )
   }

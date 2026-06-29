@@ -6,7 +6,7 @@
 \usage{
 tinytrail_dict(
   df,
-  .name = NULL,
+  df_name = NULL,
   sample_values = TRUE,
   sample_string_length = 18L
 )
@@ -14,9 +14,10 @@ tinytrail_dict(
 \arguments{
 \item{df}{A data frame.}
 
-\item{.name}{Character. Label for this entry. Defaults to the variable name of \code{df}
-as written in the calling code (e.g. \code{mtcars |> tinytrail_dict()} records as \code{"mtcars"}).
-Override when the expression is not a simple name or when you need a custom label.}
+\item{df_name}{Character. Label for this entry in the data dictionary.
+Defaults to the variable name of \code{df} as written in the calling code
+(e.g. \code{mtcars |> tinytrail_dict()} records as \code{"mtcars"}). Override when
+the expression is not a simple name or when you need a custom label.}
 
 \item{sample_values}{Logical. Record 5 sample values per column. Default \code{TRUE}.}
 
@@ -36,13 +37,14 @@ Requires \code{tinytrail()} to have been called first in the same session.
 \examples{
 \donttest{
 withr::with_tempdir({
-  writeLines("Version: 1.0", "DESCRIPTION")
-  withr::with_options(
-    list(.tinytrail_registry_path = NULL, .tinytrail_current_script = NULL), {
+  writeLines("Package: testproject\nVersion: 0.1.0", "DESCRIPTION")
 
-    tinytrail("Analyse mtcars", name = "analysis.R", record_runtime = FALSE)
-    dat <- mtcars |> tinytrail_dict(.name = "cars")
-  })
+  tinytrail("Analyse data", name = "analysis.R", record_runtime = FALSE)
+  dat <- mtcars |> tinytrail_dict(df_name = "cars")
 })
 }
+}
+\seealso{
+\code{\link[=tinytrail]{tinytrail()}} to initialise the trail, \code{\link[=tinytrail_write]{tinytrail_write()}} to
+record output paths explicitly.
 }

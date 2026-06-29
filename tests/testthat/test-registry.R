@@ -71,7 +71,7 @@ test_that("tinytrail_dict() records columns and sample values in data_dictionary
   )
 
   df <- data.frame(mpg = c(21, 22, 18, 24, 19), cyl = c(6L, 4L, 8L, 4L, 6L))
-  result <- df |> tinytrail_dict(.name = "my_data")
+  result <- df |> tinytrail_dict(df_name = "my_data")
 
   expect_identical(result, df)
 
