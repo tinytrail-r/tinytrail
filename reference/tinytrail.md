@@ -113,7 +113,5 @@ withr::with_tempdir({
     )
   })
 })
-#> Error in .teardown_write_hooks(): could not find function ".teardown_write_hooks"
-#> Error in .teardown_write_hooks(): could not find function ".teardown_write_hooks"
 # }
 ```
