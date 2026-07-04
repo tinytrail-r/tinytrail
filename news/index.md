@@ -2,6 +2,8 @@
 
 ## tinytrail 0.1.0
 
+CRAN release: 2026-07-04
+
 - Initial release (renamed from `tinylog`).
 - [`tinytrail()`](https://tinytrail-r.github.io/tinytrail/reference/tinytrail.md)
   registers a script in the project YAML trail and optionally records

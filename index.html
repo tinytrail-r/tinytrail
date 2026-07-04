@@ -50,7 +50,7 @@
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="tinytrail">tinytrail<a class="anchor" aria-label="anchor" href="#tinytrail"></a>
 </h1></div>
-<p><strong>tinytrail</strong> is a lightweight R package that — once initialized — leaves a ‘tiny trail’ of human- and AI-readable information about what each script saves to disk, making it effortless to keep better track of small to medium-sized projects. It maintains a YAML trail file (<code>_tinytrail.yaml</code>) at the project root recording which scripts produced which output files and each script’s runtime. The tinytrail package also provides a convenience function that effortlessly registers column names along with sample values (optional) in the YAML.</p>
+<p><strong>tinytrail</strong> is a lightweight R package that leaves a ‘tiny trail’ of human- and AI-readable records about each script’s outputs, making it effortless to keep track of small to medium-sized projects. It maintains a YAML trail file (<code>_tinytrail.yaml</code>) at the project root, recording which scripts produced which output files along with additional information such as each script’s runtime. It also provides a convenience function that automatically enriches <code>_tinytrail.yaml</code> with a data dictionary, including column names and, optionally, sample values.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -91,8 +91,25 @@
 <span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="at">    </span><span class="fu">outputs</span><span class="kw">:</span></span>
 <span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> output/age_dist.png</span></span>
 <span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> output/clean.csv</span></span></code></pre></div>
-<p>For write functions not in the built-in list, pass a <code>list</code> to <code>extra_hooks</code> with the function names and their file-path arguments:</p>
+<p>Optionally, pipe data frames through <code><a href="reference/tinytrail_dict.html">tinytrail_dict()</a></code> to capture column names and sample values:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># ... cleaning and preparing data ...</span></span>
+<span></span>
+<span><span class="va">dat</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/tinytrail_dict.html">tinytrail_dict</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>This adds a data dictionary entry to <code>_tinytrail.yaml</code>:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">data_dictionary</span><span class="kw">:</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="at">  </span><span class="fu">01_clean.R</span><span class="kw">:</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="at">    </span><span class="fu">dat</span><span class="kw">:</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="at">      </span><span class="fu">columns</span><span class="kw">:</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="at">        </span><span class="fu">id</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="dv">1</span><span class="kw">,</span><span class="at"> </span><span class="dv">2</span><span class="kw">,</span><span class="at"> </span><span class="dv">3</span><span class="kw">,</span><span class="at"> </span><span class="dv">4</span><span class="kw">,</span><span class="at"> </span><span class="dv">5</span><span class="kw">]</span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="at">        </span><span class="fu">age</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="dv">34</span><span class="kw">,</span><span class="at"> </span><span class="dv">52</span><span class="kw">,</span><span class="at"> </span><span class="dv">28</span><span class="kw">,</span><span class="at"> </span><span class="dv">41</span><span class="kw">,</span><span class="at"> </span><span class="dv">37</span><span class="kw">]</span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="at">        </span><span class="fu">response</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">'yes'</span><span class="kw">,</span><span class="at"> </span><span class="st">'no'</span><span class="kw">,</span><span class="at"> </span><span class="st">'yes'</span><span class="kw">,</span><span class="at"> </span><span class="st">'yes'</span><span class="kw">,</span><span class="at"> </span><span class="st">'no'</span><span class="kw">]</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="tinytrail-is-flexible">tinytrail is flexible<a class="anchor" aria-label="anchor" href="#tinytrail-is-flexible"></a>
+</h3>
+<p>For write functions not in the built-in list, pass a <code>list</code> to <code>extra_hooks</code> with the function names and their file-path arguments:</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/tinytrail.html">tinytrail</a></span><span class="op">(</span></span>
 <span>  description <span class="op">=</span> <span class="st">"Export results"</span>,</span>
 <span>  extra_hooks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
@@ -101,20 +118,8 @@
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><em>(These two functions are already captured automatically — they’re shown here for illustration only.)</em></p>
-<p>Optionally, pipe data frames through <code><a href="reference/tinytrail_dict.html">tinytrail_dict()</a></code> to capture column names and sample values:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># ... cleaning and preparing data ...</span></span>
-<span></span>
-<span><span class="va">dat</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="reference/tinytrail_dict.html">tinytrail_dict</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>This adds a data dictionary entry to <code>_tinytrail.yaml</code>:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">data_dictionary</span><span class="kw">:</span></span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="at">  </span><span class="fu">01_clean.R</span><span class="kw">:</span></span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="at">    </span><span class="fu">dat</span><span class="kw">:</span></span>
-<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="at">      </span><span class="fu">columns</span><span class="kw">:</span></span>
-<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="at">        </span><span class="fu">id</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="dv">1</span><span class="kw">,</span><span class="at"> </span><span class="dv">2</span><span class="kw">,</span><span class="at"> </span><span class="dv">3</span><span class="kw">,</span><span class="at"> </span><span class="dv">4</span><span class="kw">,</span><span class="at"> </span><span class="dv">5</span><span class="kw">]</span></span>
-<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="at">        </span><span class="fu">age</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="dv">34</span><span class="kw">,</span><span class="at"> </span><span class="dv">52</span><span class="kw">,</span><span class="at"> </span><span class="dv">28</span><span class="kw">,</span><span class="at"> </span><span class="dv">41</span><span class="kw">,</span><span class="at"> </span><span class="dv">37</span><span class="kw">]</span></span>
-<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="at">        </span><span class="fu">response</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">'yes'</span><span class="kw">,</span><span class="at"> </span><span class="st">'no'</span><span class="kw">,</span><span class="at"> </span><span class="st">'yes'</span><span class="kw">,</span><span class="at"> </span><span class="st">'yes'</span><span class="kw">,</span><span class="at"> </span><span class="st">'no'</span><span class="kw">]</span></span></code></pre></div>
+<p>If you encounter a package that is not supported, please open an issue and I will see what I can do as soon as possible.</p>
+</div>
 <div class="section level3">
 <h3 id="manual-tracking-with-auto--false">Manual tracking with <code>auto = FALSE</code>
 <a class="anchor" aria-label="anchor" href="#manual-tracking-with-auto--false"></a>
@@ -132,6 +137,7 @@
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
+<li><a href="https://cloud.r-project.org/package=tinytrail" class="external-link">View on CRAN</a></li>
 <li><a href="https://github.com/tinytrail-r/tinytrail/" class="external-link">Browse source code</a></li>
 <li><a href="https://github.com/tinytrail-r/tinytrail/issues" class="external-link">Report a bug</a></li>
 </ul>
