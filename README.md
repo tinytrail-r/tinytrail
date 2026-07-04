@@ -1,6 +1,6 @@
 # tinytrail
 
-**tinytrail** is a lightweight R package that — once initialized — leaves a 'tiny trail' of human- and AI-readable information about what each script saves to disk, making it effortless to keep better track of small to medium-sized projects. It maintains a YAML trail file (`_tinytrail.yaml`) at the project root recording which scripts produced which output files and each script's runtime. The tinytrail package also provides a convenience function that effortlessly registers column names along with sample values (optional) in the YAML.
+**tinytrail** is a lightweight R package that leaves a 'tiny trail' of human- and AI-readable records about each script's outputs, making it effortless to keep track of small to medium-sized projects. It maintains a YAML trail file (`_tinytrail.yaml`) at the project root, recording which scripts produced which output files along with additional information such as each script's runtime. It also provides a convenience function that automatically enriches `_tinytrail.yaml` with a data dictionary, including column names and, optionally, sample values.
 
 ## Installation
 
@@ -48,20 +48,6 @@ scripts:
     - output/clean.csv
 ```
 
-For write functions not in the built-in list, pass a `list` to `extra_hooks` with the function names and their file-path arguments:
-
-```r
-tinytrail(
-  description = "Export results",
-  extra_hooks = list(
-    fn  = c("readr::write_csv", "ggplot2::ggsave"),
-    arg = c("file",             "filename")
-  )
-)
-```
-
-*(These two functions are already captured automatically — they're shown here for illustration only.)*
-
 Optionally, pipe data frames through `tinytrail_dict()` to capture column names and sample values:
 
 ```r
@@ -82,6 +68,24 @@ data_dictionary:
         age: [34, 52, 28, 41, 37]
         response: ['yes', 'no', 'yes', 'yes', 'no']
 ```
+
+### tinytrail is flexible
+
+For write functions not in the built-in list, pass a `list` to `extra_hooks` with the function names and their file-path arguments:
+
+```r
+tinytrail(
+  description = "Export results",
+  extra_hooks = list(
+    fn  = c("readr::write_csv", "ggplot2::ggsave"),
+    arg = c("file",             "filename")
+  )
+)
+```
+
+*(These two functions are already captured automatically — they're shown here for illustration only.)*
+
+If you encounter a package that is not supported, please open an issue and I will see what I can do as soon as possible.
 
 ### Manual tracking with `auto = FALSE`
 
