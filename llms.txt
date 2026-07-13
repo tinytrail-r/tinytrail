@@ -2,13 +2,7 @@
 
 **tinytrail** is a lightweight R package that leaves a ‘tiny trail’ of
 human- and AI-readable records about each script’s outputs, making it
-effortless to keep track of small to medium-sized projects. It maintains
-a YAML trail file (`_tinytrail.yaml`) at the project root, recording
-which scripts produced which output files along with additional
-information such as each script’s runtime. It also provides a
-convenience function that automatically enriches `_tinytrail.yaml` with
-a data dictionary, including column names and, optionally, sample
-values.
+effortless to keep track of small to medium-sized projects.
 
 ## Installation
 
@@ -106,7 +100,8 @@ tinytrail(
 here for illustration only.)*
 
 If you encounter a package that is not supported, please open an issue
-and I will see what I can do as soon as possible.
+and I will see what I can do as soon as possible. The next update will
+include more popular packages that employ custom save/write functions.
 
 ### Manual tracking with `auto = FALSE`
 
