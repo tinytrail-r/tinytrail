@@ -1,7 +1,6 @@
 # tinytrail
 
 [![CRAN status](https://www.r-pkg.org/badges/version/tinytrail)](https://CRAN.R-project.org/package=tinytrail)
-[![CRAN downloads](https://cranlogs.r-pkg.org/badges/last-week/tinytrail)](https://cran.r-project.org/package=tinytrail)
 
 **tinytrail** is a lightweight R package that leaves a 'tiny trail' of human- and AI-readable records about each script's outputs, making it effortless to keep track of small to medium-sized projects.
 
