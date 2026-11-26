@@ -61,16 +61,97 @@
   if (pkg_env_name %in% search()) as.environment(pkg_env_name) else asNamespace(pkg)
 }
 
+# Packages whose own file writes are never outputs of the user's script:
+# knitr/rmarkdown/Quarto chunk figures, cache files and temporary files.
+.TOOLING_NAMESPACES <- c("knitr", "rmarkdown", "evaluate", "quarto")
+
+# TRUE when a hooked write function was called directly by tooling rather than
+# by the user's code. tinytrail records only what the user's code saves to disk
+# (issue #9). Tooling means:
+# - RStudio, which keeps its internal R functions (`.rs.*`) in the attached
+#   "tools:rstudio" environment and uses them to save the Plots pane (a
+#   <hash>.png per plot and a <uuid>.snapshot via save());
+# - functions from .TOOLING_NAMESPACES, e.g. knitr opening png() for chunk
+#   figures or save() for its cache.
+# `fn_env` is the evaluation frame of the traced write function (the tracer
+# passes `environment()`). Starting from the frame that called it, the call
+# chain is walked upwards until a frame belongs either to the user (code whose
+# environment leads to the global env, or top level) or to tooling. Frames of
+# other packages in between (lapply(), purrr, tools::makeLazyLoadDB(), ...) are
+# passed through, so `lapply(x, saveRDS, ...)` in a script is still recorded
+# while knitr's cache files are not. Code that merely runs under the IDE, or
+# that knitr/source() evaluates with eval() (chunk code), counts as user code. Explicit tinytrail_write() calls
+# are never affected.
+.called_by_tooling <- function(fn_env) {
+  frames  <- sys.frames()
+  parents <- sys.parents()
+  # The first match is the write function's own frame; later matches are the
+  # eval() frames that trace() uses to run the tracer inside it.
+  idx <- which(vapply(frames, identical, logical(1), fn_env))
+  if (length(idx) == 0L) return(FALSE)
+  ide_env <- if ("tools:rstudio" %in% search()) as.environment("tools:rstudio")
+
+  owner <- function(env) {
+    while (is.environment(env) &&
+           !identical(env, globalenv()) && !identical(env, emptyenv())) {
+      if (!is.null(ide_env) && identical(env, ide_env)) return("tooling")
+      if (isNamespace(env))
+        return(if (getNamespaceName(env) %in% .TOOLING_NAMESPACES) "tooling" else "package")
+      env <- parent.env(env)
+    }
+    "user"
+  }
+
+  k <- parents[idx[1L]]
+  seen <- integer(0)
+  while (k >= 1L && !(k %in% seen)) {
+    seen <- c(seen, k)
+    # Code run through eval() is code someone asked to run: a knitted chunk,
+    # a sourced line, a callr/targets step. Treat it as the user's code even
+    # when its environment's parent is a package namespace.
+    if (identical(sys.function(k), base::eval)) return(FALSE)
+    who <- owner(frames[[k]])
+    if (who != "package") return(who == "tooling")
+    k <- parents[k]
+  }
+  FALSE  # reached top level: user code
+}
+
+# TRUE when `path` is a temporary file of this R session: inside tempdir() but
+# outside the project (the folder holding _tinytrail.yaml). Such files are
+# deleted when R exits, so they are never lasting outputs of a script. RStudio
+# writes inline plot previews there (<hash>.png in Rtmp...) by calling png()
+# straight from its C++ side, which looks like a top-level call, so the caller
+# check in .called_by_tooling() cannot catch it (issue #9). A project that
+# itself lives in tempdir() (tests, reprexes) still has its files recorded.
+.is_session_temp_file <- function(path) {
+  norm <- function(p) {
+    p <- normalizePath(p, winslash = "/", mustWork = FALSE)
+    if (.Platform$OS.type == "windows") tolower(p) else p
+  }
+  inside <- function(dir, root) identical(dir, root) || startsWith(dir, paste0(root, "/"))
+  dir <- dirname(path)
+  if (!grepl("^(/|~|[A-Za-z]:|\\\\)", dir)) dir <- file.path(getwd(), dir)
+  dir <- norm(dir)
+  if (!inside(dir, norm(tempdir()))) return(FALSE)
+  registry <- getOption(".tinytrail_registry_path")
+  project  <- if (is.character(registry)) norm(dirname(registry)) else NULL
+  is.null(project) || !inside(dir, project)
+}
+
 # Traces a single function. Returns TRUE on success, FALSE if unavailable.
 .hook_one <- function(fn_name, pkg, arg) {
   where <- .trace_env(pkg)
   if (is.null(where)) return(FALSE)
 
+  from_tooling_ <- .called_by_tooling
+  is_temp_      <- .is_session_temp_file
   tracer <- bquote(
     tryCatch({
-      if (!is.null(getOption(".tinytrail_current_script"))) {
+      if (!is.null(getOption(".tinytrail_current_script")) && !(.(from_tooling_))(environment())) {
         val <- .(as.name(arg))
-        if (is.character(val) && length(val) == 1L && nzchar(val))
+        if (is.character(val) && length(val) == 1L && nzchar(val) &&
+            !(.(is_temp_))(val))
           tinytrail_write(val)
       }
     }, error = function(e) NULL)

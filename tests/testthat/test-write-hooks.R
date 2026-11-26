@@ -344,3 +344,114 @@ test_that("auto hook does not interrupt the user's write call on registry failur
   expect_no_error(write.csv(mtcars, "out.csv"))
   expect_true(file.exists("out.csv"))             # the write still completed
 })
+
+# ---------------------------------------------------------------------------
+# IDE-internal writes (issue #9)
+# ---------------------------------------------------------------------------
+
+# Simulates RStudio: internal `.rs.*` functions live in an attached
+# "tools:rstudio" environment and save the Plots pane (<hash>.png, and a
+# <uuid>.snapshot via save()). They are called by closure object, which puts a
+# multiline call on the stack.
+local_fake_ide <- function(envir = parent.frame()) {
+  ide <- attach(NULL, name = "tools:rstudio", warn.conflicts = FALSE)
+  withr::defer(detach("tools:rstudio", character.only = TRUE), envir = envir)
+  evalq({
+    .rs.savePlotPng <- function(filename) {
+      grDevices::png(filename)
+      plot(1)
+      grDevices::dev.off()
+      invisible(filename)
+    }
+    .rs.saveSnapshot <- function(filename) {
+      plot <- 1
+      save(plot, file = filename)
+      invisible(filename)
+    }
+  }, ide)
+  ide
+}
+
+test_that("plot files saved by IDE internals are not recorded", {
+  tmp <- withr::local_tempdir()
+  local_session(tmp)
+  ide <- local_fake_ide()
+  sess <- withr::local_tempdir()
+
+  expect_no_message(
+    eval(as.call(list(ide$.rs.savePlotPng, file.path(sess, "fd7225ba.png")))),
+    message = "could not record"
+  )
+  expect_no_message(
+    eval(as.call(list(ide$.rs.saveSnapshot, file.path(sess, "77ba5c2f.snapshot")))),
+    message = "could not record"
+  )
+  expect_false(has_output("fd7225ba.png"))
+  expect_false(has_output("77ba5c2f.snapshot"))
+})
+
+test_that("user writes are still recorded while IDE internals are attached", {
+  tmp <- withr::local_tempdir()
+  local_session(tmp)
+  local_fake_ide()
+
+  write.csv(mtcars, "top.csv")
+  (function() {
+    x <- 1
+    saveRDS(x, "nested.rds")
+  })()
+  expect_true(has_output("top.csv"))
+  expect_true(has_output("nested.rds"))
+})
+
+test_that("files written by knitr itself are not recorded, chunk writes are", {
+  skip_if_not_installed("knitr")
+  tmp <- withr::local_tempdir()
+  local_session(tmp)
+  writeLines(c(
+    "```{r plot}",
+    "plot(1:10)",
+    "```",
+    "```{r cached, cache=TRUE}",
+    "plot(2)",
+    "```",
+    "```{r save}",
+    "write.csv(mtcars, 'chunk.csv')",
+    "png('chunk_plot.png'); plot(1); invisible(dev.off())",
+    "```"
+  ), "report.Rmd")
+  suppressMessages(knitr::knit("report.Rmd", quiet = TRUE, envir = new.env()))
+
+  outputs <- unlist(yaml::read_yaml("_tinytrail.yaml")$scripts[["test.R"]]$outputs)
+  expect_true(has_output("chunk.csv"))
+  expect_true(has_output("chunk_plot.png"))
+  expect_false(any(grepl("figure/", outputs, fixed = TRUE)))  # chunk figures
+  expect_false(any(grepl("cache/", outputs, fixed = TRUE)))   # knitr cache
+  expect_setequal(basename(outputs), c("chunk.csv", "chunk_plot.png"))
+})
+
+test_that("writes through other packages' functionals are still recorded", {
+  tmp <- withr::local_tempdir()
+  local_session(tmp)
+  invisible(lapply("lapply.rds", function(f) saveRDS(1, f)))
+  invisible(Map(saveRDS, list(1), "map.rds"))
+  expect_true(has_output("lapply.rds"))
+  expect_true(has_output("map.rds"))
+})
+
+test_that("session temp files outside the project are not recorded", {
+  tmp <- withr::local_tempdir()
+  local_session(tmp)
+  # The test project itself lives in tempdir(), so use a sibling folder that
+  # is in tempdir() but outside the project, like RStudio's inline plot files.
+  other <- withr::local_tempdir()
+  preview <- file.path(other, "132ab11ca11243498a949fc803a5e26a.png")
+  png(preview); plot(1); invisible(dev.off())
+  saveRDS(1, file.path(tempdir(), "scratch.rds"))
+  withr::defer(unlink(file.path(tempdir(), "scratch.rds")))
+  write.csv(mtcars, "kept.csv")
+
+  expect_false(has_output("132ab11ca11243498a949fc803a5e26a.png"))
+  expect_false(has_output("scratch.rds"))
+  expect_true(has_output("kept.csv"))
+})

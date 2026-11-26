@@ -159,7 +159,7 @@ tinytrail <- function(description,
 
   if (record_runtime) {
     start_sec  <- as.numeric(Sys.time())
-    source_idx <- which(vapply(sys.calls(), \(x) deparse(x[[1]]) == "source", logical(1)))
+    source_idx <- .source_frame_idx()
     .setup_runtime_hook(
       script_name   = name,
       registry_path = registry_path,
@@ -170,7 +170,7 @@ tinytrail <- function(description,
 
   if (auto) {
     .setup_write_hooks(extra = extra_hooks)
-    source_idx <- which(vapply(sys.calls(), \(x) deparse(x[[1]]) == "source", logical(1)))
+    source_idx <- .source_frame_idx()
     if (length(source_idx) > 0L) {
       teardown_ <- .teardown_write_hooks
       do.call(
