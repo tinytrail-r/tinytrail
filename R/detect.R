@@ -1,7 +1,23 @@
 # Context detection: where and how is the current script running?
 
+# Frame numbers of active source() calls on the call stack.
+# Matches the function part of each call structurally (`source`, `base::source`
+# or `base:::source`). deparse() is avoided on purpose: it returns several
+# strings for multiline function expressions (e.g. anonymous functions), which
+# broke vapply(..., logical(1)) -- see issue #9.
+.source_frame_idx <- function() {
+  is_source <- function(call) {
+    fn <- call[[1L]]
+    if (is.symbol(fn)) return(identical(fn, quote(source)))
+    is.call(fn) && length(fn) == 3L &&
+      (identical(fn[[1L]], quote(`::`)) || identical(fn[[1L]], quote(`:::`))) &&
+      identical(fn[[2L]], quote(base)) && identical(fn[[3L]], quote(source))
+  }
+  which(vapply(sys.calls(), is_source, logical(1)))
+}
+
 .script_dir <- function() {
-  idx <- which(vapply(sys.calls(), \(x) deparse(x[[1]]) == "source", logical(1)))
+  idx <- .source_frame_idx()
   if (length(idx) > 0) {
     frame <- sys.frame(idx[length(idx)])
     path  <- if (is.character(frame$ofile)) frame$ofile
@@ -30,7 +46,7 @@
 
 .get_current_script_name <- function() {
   # 1. source() call stack -- standard usage
-  idx <- which(vapply(sys.calls(), \(x) deparse(x[[1]]) == "source", logical(1)))
+  idx <- .source_frame_idx()
   if (length(idx) > 0) {
     frame <- sys.frame(idx[length(idx)])
     path  <- if (is.character(frame$ofile)) frame$ofile
