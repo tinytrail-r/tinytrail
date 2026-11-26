@@ -89,7 +89,7 @@ tinytrail(
 
 *(These two functions are already captured automatically — they're shown here for illustration only.)*
 
-If you encounter a package that is not supported, please open an issue and I will see what I can do as soon as possible. The next update will include more popular packages that employ custom save/write functions.
+If you use a package whose save or write functions tinytrail doesn't track yet, please [open an issue](https://github.com/tinytrail-r/tinytrail/issues) and name the package and function. I'll see what I can do as soon as possible.
 
 ### Manual tracking with `auto = FALSE`
 
