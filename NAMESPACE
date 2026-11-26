@@ -2,4 +2,5 @@
 
 export(tinytrail)
 export(tinytrail_dict)
+export(tinytrail_the_end)
 export(tinytrail_write)

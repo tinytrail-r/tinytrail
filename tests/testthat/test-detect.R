@@ -26,7 +26,7 @@ test_that("tinytrail_write() records output inside a multiline anonymous functio
   withr::local_dir(tmp)
   local_clean_options()
   tinytrail(name = "reprex.R", description = "test", data_source = "none",
-            auto = FALSE, record_runtime = FALSE)
+            auto = FALSE)
 
   expect_no_message(
     (function() {
@@ -45,7 +45,7 @@ test_that("source() detection still finds the script name", {
   local_clean_options()
   writeLines(c(
     'tinytrail(description = "sourced", data_source = "none",',
-    '          auto = FALSE, record_runtime = FALSE)',
+    '          auto = FALSE)',
     '(function() {',
     '  x <- 1',
     '  tinytrail_write("sourced-out.csv")',
@@ -63,7 +63,7 @@ test_that("base::source() is detected as a source() call", {
   local_clean_options()
   writeLines(c(
     'tinytrail(description = "sourced", data_source = "none",',
-    '          auto = FALSE, record_runtime = FALSE)'
+    '          auto = FALSE)'
   ), "ns_script.R")
 
   base::source("ns_script.R", local = new.env(parent = asNamespace("tinytrail")))

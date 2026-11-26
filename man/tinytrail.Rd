@@ -8,7 +8,7 @@ tinytrail(
   description,
   data_source = NULL,
   pin_to_top = FALSE,
-  record_runtime = TRUE,
+  record_runtime = NULL,
   name = NULL,
   auto = TRUE,
   extra_hooks = NULL
@@ -25,10 +25,8 @@ this script — name the dataset or survey, not a file path
 for a \code{main.R} that sources other scripts — keeps it visible at the top of
 \verb{_tinytrail.yaml} regardless of alphabetical order. Default \code{FALSE}.}
 
-\item{record_runtime}{Logical. Record how long the script takes to run, in
-minutes, as \code{script_runtime} in \verb{_tinytrail.yaml}. Default \code{TRUE}. Only
-some ways of running a script can be timed; see the \emph{Runtime tracking}
-section below.}
+\item{record_runtime}{Deprecated and ignored. To record how long a script
+takes, put \code{\link[=tinytrail_the_end]{tinytrail_the_end()}} at the end of the script.}
 
 \item{name}{Character. Override the auto-detected script name. Intended for
 use in tests and non-standard execution environments where auto-detection
@@ -59,46 +57,6 @@ By default (\code{auto = TRUE}) common write functions (\code{write.csv}, \code{
 their output file paths are captured without any \code{tinytrail_write()} wrapper.
 Set \code{auto = FALSE} to use explicit \code{tinytrail_write()} calls instead.
 }
-\section{Runtime tracking}{
-
-Some scripts take minutes or hours to run, and a project often has several
-of them that are rerun many times, for example a \code{main.R} that sources a
-cleaning script, a modelling script and a report. With
-\code{record_runtime = TRUE}, each script's entry in \verb{_tinytrail.yaml} gets a
-\code{script_runtime} field, such as \verb{script_runtime: 12.4 min}, so you can see
-at a glance which steps are slow and how long a full rerun will take.
-
-The time is wall-clock time from the \code{tinytrail()} call until the script
-finishes, so place \code{tinytrail()} at the very top of the script, before
-\code{library()} calls. Each run replaces the previous value. When the time is
-recorded, a line such as \verb{clean.R: 12.4 min elapsed} is printed.
-
-Whether the time can be recorded depends on how the script is run, because
-tinytrail needs to know when the script has finished:\tabular{ll}{
-   How the script is run \tab Time recorded? \cr
-   \code{source("scripts/clean.R")}, also when called from another script such as \code{main.R} \tab Yes, when \code{source()} returns \cr
-   RStudio \strong{Source} button (Ctrl+Shift+S) or \strong{Source with Echo} (Ctrl+Shift+Enter) \tab Yes, these call \code{source()} \cr
-   \verb{Rscript scripts/clean.R} or \verb{R CMD BATCH}, for example from a scheduled task \tab Yes, when R exits \cr
-   \verb{quarto render report.qmd} (R code chunks run with knitr), or the RStudio \strong{Render} button \tab Yes, when the document has finished \cr
-   \code{rmarkdown::render()}, \code{knitr::knit()}, or the RStudio \strong{Knit} button \tab Yes, when the document has finished \cr
-   RStudio \strong{Run All} (Ctrl+Alt+R), \strong{Run} / Ctrl+Enter on selected lines, or running chunks one by one in a \code{.qmd} or \code{.Rmd} \tab No \cr
-}
-
-
-Running code interactively sends it to the console one line or chunk at a
-time, so R cannot tell when "the script" has ended, and the time would
-include any pauses between chunks. In that case no message is printed and
-\code{script_runtime} is left out of the entry for that run. To get a time,
-run the whole file with \code{source()}, the \strong{Source} button, \code{Rscript} or a
-render instead.
-
-If a script stops with an error, the time up to the error is recorded when
-it is run with \code{source()} or \code{Rscript}; a render that fails records no time.
-
-When \code{main.R} sources several scripts that each call \code{tinytrail()}, every
-script gets its own \code{script_runtime}, and \code{main.R} gets the total.
-}
-
 \examples{
 \donttest{
 withr::with_tempdir({
@@ -107,7 +65,6 @@ withr::with_tempdir({
   tinytrail(
     description    = "Clean and summarise survey data",
     data_source    = "Current Population Survey (BLS)",
-    record_runtime = FALSE,
     name           = "clean.R"
   )
   write.csv(mtcars, "clean.csv")
@@ -117,5 +74,6 @@ withr::with_tempdir({
 }
 \seealso{
 \code{\link[=tinytrail_write]{tinytrail_write()}} to record output paths explicitly,
-\code{\link[=tinytrail_dict]{tinytrail_dict()}} to capture a data dictionary.
+\code{\link[=tinytrail_dict]{tinytrail_dict()}} to capture a data dictionary,
+\code{\link[=tinytrail_the_end]{tinytrail_the_end()}} to record the total runtime.
 }

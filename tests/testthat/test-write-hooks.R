@@ -17,7 +17,7 @@ local_session <- function(tmp, envir = parent.frame()) {
     .local_envir = envir
   )
   tinytrail(name = "test.R", data_source = "none",
-            description = "test", record_runtime = FALSE)
+            description = "test")
   # Tear down traces before options are restored (LIFO: this runs first).
   withr::defer(.teardown_write_hooks(), envir = envir)
 }

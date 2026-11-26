@@ -39,7 +39,7 @@ Requires \code{tinytrail()} to have been called first in the same session.
 withr::with_tempdir({
   writeLines("Package: testproject\nVersion: 0.1.0", "DESCRIPTION")
 
-  tinytrail("Analyse data", name = "analysis.R", record_runtime = FALSE)
+  tinytrail("Analyse data", name = "analysis.R")
   dat <- mtcars |> tinytrail_dict(df_name = "cars")
 })
 }

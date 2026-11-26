@@ -39,11 +39,6 @@
   NULL
 }
 
-.in_knitr <- function() {
-  requireNamespace("knitr", quietly = TRUE) &&
-    !is.null(tryCatch(knitr::current_input(), error = function(e) NULL))
-}
-
 .get_current_script_name <- function() {
   # 1. source() call stack -- standard usage
   idx <- .source_frame_idx()

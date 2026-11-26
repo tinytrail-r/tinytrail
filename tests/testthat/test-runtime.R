@@ -1,51 +1,89 @@
-# Runtime tracking: which ways of running a script record script_runtime.
+# tinytrail_the_end(): records the time between tinytrail() and the marker.
 
-.runtime_project <- function(env = parent.frame()) {
-  tmp <- withr::local_tempdir(.local_envir = env)
-  writeLines("Package: testproject", file.path(tmp, "DESCRIPTION"))
-  dir.create(file.path(tmp, "scripts"))
+test_that("tinytrail_the_end() records script_runtime", {
+  tmp <- withr::local_tempdir()
+  withr::local_dir(tmp)
+  withr::local_options(.tinytrail_current_script = NULL, .tinytrail_registry_path = NULL)
+  writeLines("Package: testproject", "DESCRIPTION")
+
+  tinytrail("test", name = "timed.R", auto = FALSE)
+  expect_null(yaml::read_yaml("_tinytrail.yaml")$scripts[["timed.R"]]$script_runtime)
+
+  expect_message(res <- tinytrail_the_end(), "timed.R: [0-9.]+ min runtime")
+  expect_type(res, "double")
+  reg <- yaml::read_yaml("_tinytrail.yaml")
+  expect_match(reg$scripts[["timed.R"]]$script_runtime, "^[0-9.]+ min$")
+})
+
+test_that("a new run without tinytrail_the_end() drops the old runtime", {
+  tmp <- withr::local_tempdir()
+  withr::local_dir(tmp)
+  withr::local_options(.tinytrail_current_script = NULL, .tinytrail_registry_path = NULL)
+  writeLines("Package: testproject", "DESCRIPTION")
+
+  tinytrail("test", name = "timed.R", auto = FALSE)
+  suppressMessages(tinytrail_the_end())
+  tinytrail("test", name = "timed.R", auto = FALSE)
+  expect_null(yaml::read_yaml("_tinytrail.yaml")$scripts[["timed.R"]]$script_runtime)
+})
+
+test_that("tinytrail_the_end() works when the script is sourced", {
+  tmp <- withr::local_tempdir()
+  withr::local_dir(tmp)
+  withr::local_options(.tinytrail_current_script = NULL, .tinytrail_registry_path = NULL)
+  writeLines("Package: testproject", "DESCRIPTION")
   writeLines(c(
-    "tinytrail::tinytrail('Runtime test', auto = FALSE)",
-    "x <- 1"
-  ), file.path(tmp, "scripts", "timed.R"))
-  tmp
-}
+    "tinytrail::tinytrail('sourced', auto = FALSE)",
+    "x <- 1",
+    "tinytrail::tinytrail_the_end()"
+  ), "script.R")
 
-.runtime_of <- function(dir, script) {
-  reg <- yaml::read_yaml(file.path(dir, "_tinytrail.yaml"))
-  reg$scripts[[script]]$script_runtime
-}
-
-test_that("source() records script_runtime", {
-  tmp <- .runtime_project()
-  withr::local_dir(tmp)
-  withr::local_options(.tinytrail_current_script = NULL, .tinytrail_registry_path = NULL)
-
-  expect_message(source(file.path("scripts", "timed.R")), "timed.R: .* min elapsed")
-  expect_match(.runtime_of(tmp, "timed.R"), "^[0-9.]+ min$")
+  expect_message(source("script.R"), "script.R: .* min runtime")
+  expect_match(yaml::read_yaml("_tinytrail.yaml")$scripts[["script.R"]]$script_runtime,
+               "^[0-9.]+ min$")
 })
 
-test_that("Rscript records script_runtime when R exits", {
-  skip_on_cran()
-  tmp <- .runtime_project()
-  rscript <- file.path(R.home("bin"), "Rscript")
-  out <- withr::with_dir(tmp, withr::with_envvar(
-    c(R_LIBS = paste(.libPaths(), collapse = .Platform$path.sep)),
-    system2(rscript, file.path("scripts", "timed.R"), stdout = TRUE, stderr = TRUE)
-  ))
-  expect_true(any(grepl("timed.R: .* min elapsed", out)), info = paste(out, collapse = "\n"))
-  expect_match(.runtime_of(tmp, "timed.R"), "^[0-9.]+ min$")
+test_that("tinytrail_the_end() without tinytrail() writes a warning, not an error", {
+  tmp <- withr::local_tempdir()
+  withr::local_dir(tmp)
+  withr::local_options(.tinytrail_current_script = NULL, .tinytrail_registry_path = NULL,
+                       .tinytrail_warned = NULL)
+  writeLines("Package: testproject", "DESCRIPTION")
+
+  expect_null(suppressMessages(tinytrail_the_end()))
+  reg <- yaml::read_yaml("_tinytrail.yaml")
+  expect_true(any(vapply(reg$scripts, \(s) grepl("tinytrail()", s$warning %||% "", fixed = TRUE),
+                         logical(1))))
 })
 
-test_that("no runtime message when the script end cannot be detected", {
-  tmp <- .runtime_project()
+test_that("record_runtime is deprecated and ignored", {
+  tmp <- withr::local_tempdir()
   withr::local_dir(tmp)
   withr::local_options(.tinytrail_current_script = NULL, .tinytrail_registry_path = NULL)
+  writeLines("Package: testproject", "DESCRIPTION")
 
-  # Not sourced and not knitted: no console note about source() any more
-  expect_no_message(
-    tinytrail("test", name = "plain.R", auto = FALSE),
-    message = "requires source"
-  )
-  expect_null(.runtime_of(tmp, "plain.R"))
+  expect_warning(tinytrail("test", name = "old.R", auto = FALSE, record_runtime = FALSE),
+                 "tinytrail_the_end")
+  expect_no_message(tinytrail("test", name = "plain.R", auto = FALSE), message = "source")
+})
+
+test_that("tinytrail_the_end() in main.R records main.R after sourcing other scripts", {
+  tmp <- withr::local_tempdir()
+  withr::local_dir(tmp)
+  withr::local_options(.tinytrail_current_script = NULL, .tinytrail_registry_path = NULL)
+  writeLines("Package: testproject", "DESCRIPTION")
+  writeLines(c(
+    "tinytrail::tinytrail('child', auto = FALSE)",
+    "tinytrail::tinytrail_the_end()"
+  ), "child.R")
+  writeLines(c(
+    "tinytrail::tinytrail('main', auto = FALSE)",
+    "source('child.R')",
+    "tinytrail::tinytrail_the_end()"
+  ), "main.R")
+
+  suppressMessages(source("main.R"))
+  reg <- yaml::read_yaml("_tinytrail.yaml")
+  expect_match(reg$scripts[["main.R"]]$script_runtime, "^[0-9.]+ min$")
+  expect_match(reg$scripts[["child.R"]]$script_runtime, "^[0-9.]+ min$")
 })
