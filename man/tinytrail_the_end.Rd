@@ -12,11 +12,22 @@ The runtime in minutes, invisibly.
 \description{
 Sometimes it's nice to know the total runtime. Add \code{tinytrail_the_end()}
 at the end of the script; it records the time between \code{\link[=tinytrail]{tinytrail()}} and
-this marker as \code{script_runtime} in \verb{_tinytrail.yaml}.
+this marker in \verb{_tinytrail.yaml}.
 }
 \details{
-Caveat: if you run the code line by line, the time may not be reliable,
-because it then includes any pauses between lines.
+The time goes into a field that depends on how the script was run, and
+each run only updates its own field:
+\itemize{
+\item \code{runtime_render}: rendered, e.g. \verb{quarto render}, \code{rmarkdown::render()}
+or the RStudio Render/Knit button.
+\item \code{runtime_interactive}: run line by line or chunk by chunk, e.g. RStudio
+Run All or Ctrl+Enter.
+\item \code{runtime_script}: the whole file run with \code{source()}, the RStudio Source
+button or \code{Rscript}.
+}
+
+Caveat: \code{runtime_interactive} may not be reliable, because it includes any
+pauses between lines or chunks.
 }
 \examples{
 \donttest{

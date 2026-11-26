@@ -64,9 +64,11 @@ write.csv(
 ```
 
 Optionally, put `tinytrail_the_end()` at the end of the script. It records the
-time between `tinytrail()` and this marker as `script_runtime`, which is handy
-for scripts that take a long time to run. If you run the code line by line,
-the time may not be reliable.
+time between `tinytrail()` and this marker, which is handy for scripts that
+take a long time to run. Rendered documents get `runtime_render`, code run line
+by line or chunk by chunk (RStudio Run All) gets `runtime_interactive`, and
+`source()` or `Rscript` gives `runtime_script`. The interactive time may not be
+reliable, because it includes pauses between chunks.
 
 ```{r the-end, eval=FALSE}
 # --- end of 01_clean.R ---
@@ -85,7 +87,7 @@ scripts:
     data_source: Current Population Survey (BLS)
     first_run: '2026-01-15 09:12'
     latest_run: '2026-01-20 11:05'
-    script_runtime: 0.3 min
+    runtime_script: 0.3 min
     n_outputs: 1
     outputs:
     - data/clean/survey_clean.csv
@@ -94,7 +96,7 @@ scripts:
     data_source: Cleaned survey data (01_clean.R)
     first_run: '2026-01-16 14:22'
     latest_run: '2026-01-20 11:08'
-    script_runtime: 1.4 min
+    runtime_script: 1.4 min
     n_outputs: 2
     outputs:
     - results/model_fit.rds

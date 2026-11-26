@@ -9,8 +9,10 @@
 .TIP_FREQUENCY      <- 20L  # show startup tip on 1-in-N runs
 .SENSITIVITY_PREFIX <- "sensitivity_"  # output filename prefix that sorts last
 .REGISTRY_FILENAME  <- "_tinytrail.yaml"
+# One runtime field per way of running a script (see tinytrail_the_end())
+.RUNTIME_FIELDS     <- c("runtime_script", "runtime_render", "runtime_interactive")
 .KEY_ORDER          <- c("description", "data_source", "first_run",
-                         "latest_run", "script_runtime", "n_outputs", "outputs")
+                         "latest_run", .RUNTIME_FIELDS, "n_outputs", "outputs")
 
 # Start time of each script, set by tinytrail(), read by tinytrail_the_end()
 .runtime_starts <- new.env(parent = emptyenv())
