@@ -61,14 +61,44 @@
   if (pkg_env_name %in% search()) as.environment(pkg_env_name) else asNamespace(pkg)
 }
 
+# TRUE when a hooked write function was called directly by the IDE rather than
+# by the user's code. RStudio keeps its internal R functions (`.rs.*`) in the
+# attached "tools:rstudio" environment and uses them to save the Plots pane (a
+# <hash>.png per plot and a <uuid>.snapshot via save()). Those files live in the
+# IDE's session folder and are not outputs of the script (issue #9).
+# `fn_env` is the evaluation frame of the traced write function (the tracer
+# passes `environment()`); the frame it was called from is looked up on the
+# call stack. Only that direct caller is checked -- not the whole stack -- so
+# user code that merely runs under the IDE (console, notebook chunks) is still
+# recorded. Explicit tinytrail_write() calls are never affected.
+.called_from_ide <- function(fn_env) {
+  if (!"tools:rstudio" %in% search()) return(FALSE)
+  ide_env <- as.environment("tools:rstudio")
+  frames  <- sys.frames()
+  # The first match is the write function's own frame; later matches are the
+  # eval() frames that trace() uses to run the tracer inside it.
+  idx <- which(vapply(frames, identical, logical(1), fn_env))
+  if (length(idx) == 0L) return(FALSE)
+  parent_no <- sys.parents()[idx[1L]]
+  if (parent_no < 1L) return(FALSE)  # called from top level
+  env <- frames[[parent_no]]
+  while (is.environment(env) &&
+         !identical(env, globalenv()) && !identical(env, emptyenv())) {
+    if (identical(env, ide_env)) return(TRUE)
+    env <- parent.env(env)
+  }
+  FALSE
+}
+
 # Traces a single function. Returns TRUE on success, FALSE if unavailable.
 .hook_one <- function(fn_name, pkg, arg) {
   where <- .trace_env(pkg)
   if (is.null(where)) return(FALSE)
 
+  from_ide_ <- .called_from_ide
   tracer <- bquote(
     tryCatch({
-      if (!is.null(getOption(".tinytrail_current_script"))) {
+      if (!is.null(getOption(".tinytrail_current_script")) && !(.(from_ide_))(environment())) {
         val <- .(as.name(arg))
         if (is.character(val) && length(val) == 1L && nzchar(val))
           tinytrail_write(val)

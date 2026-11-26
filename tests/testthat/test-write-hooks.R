@@ -344,3 +344,62 @@ test_that("auto hook does not interrupt the user's write call on registry failur
   expect_no_error(write.csv(mtcars, "out.csv"))
   expect_true(file.exists("out.csv"))             # the write still completed
 })
+
+# ---------------------------------------------------------------------------
+# IDE-internal writes (issue #9)
+# ---------------------------------------------------------------------------
+
+# Simulates RStudio: internal `.rs.*` functions live in an attached
+# "tools:rstudio" environment and save the Plots pane (<hash>.png, and a
+# <uuid>.snapshot via save()). They are called by closure object, which puts a
+# multiline call on the stack.
+local_fake_ide <- function(envir = parent.frame()) {
+  ide <- attach(NULL, name = "tools:rstudio", warn.conflicts = FALSE)
+  withr::defer(detach("tools:rstudio", character.only = TRUE), envir = envir)
+  evalq({
+    .rs.savePlotPng <- function(filename) {
+      grDevices::png(filename)
+      plot(1)
+      grDevices::dev.off()
+      invisible(filename)
+    }
+    .rs.saveSnapshot <- function(filename) {
+      plot <- 1
+      save(plot, file = filename)
+      invisible(filename)
+    }
+  }, ide)
+  ide
+}
+
+test_that("plot files saved by IDE internals are not recorded", {
+  tmp <- withr::local_tempdir()
+  local_session(tmp)
+  ide <- local_fake_ide()
+  sess <- withr::local_tempdir()
+
+  expect_no_message(
+    eval(as.call(list(ide$.rs.savePlotPng, file.path(sess, "fd7225ba.png")))),
+    message = "could not record"
+  )
+  expect_no_message(
+    eval(as.call(list(ide$.rs.saveSnapshot, file.path(sess, "77ba5c2f.snapshot")))),
+    message = "could not record"
+  )
+  expect_false(has_output("fd7225ba.png"))
+  expect_false(has_output("77ba5c2f.snapshot"))
+})
+
+test_that("user writes are still recorded while IDE internals are attached", {
+  tmp <- withr::local_tempdir()
+  local_session(tmp)
+  local_fake_ide()
+
+  write.csv(mtcars, "top.csv")
+  (function() {
+    x <- 1
+    saveRDS(x, "nested.rds")
+  })()
+  expect_true(has_output("top.csv"))
+  expect_true(has_output("nested.rds"))
+})
