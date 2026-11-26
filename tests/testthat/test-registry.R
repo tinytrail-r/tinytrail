@@ -15,8 +15,7 @@ test_that("tinytrail() sets the script name option", {
   tinytrail(
     name        = "test.R",
     data_source = "none",
-    description = "test",
-    record_runtime = FALSE
+    description = "test"
   )
 
   expect_equal(getOption(".tinytrail_current_script"), "test.R")
@@ -31,8 +30,7 @@ test_that("tinytrail_write() registers path and returns it", {
   tinytrail(
     name        = "test.R",
     data_source = "none",
-    description = "test",
-    record_runtime = FALSE
+    description = "test"
   )
 
   path <- file.path(tmp, "output.png")
@@ -66,8 +64,7 @@ test_that("tinytrail_dict() records columns and sample values in data_dictionary
   tinytrail(
     name        = "test.R",
     data_source = "none",
-    description = "test",
-    record_runtime = FALSE
+    description = "test"
   )
 
   df <- data.frame(mpg = c(21, 22, 18, 24, 19), cyl = c(6L, 4L, 8L, 4L, 6L))
@@ -89,8 +86,7 @@ test_that("tinytrail_dict() auto-names entry from df variable name", {
   tinytrail(
     name        = "test.R",
     data_source = "none",
-    description = "test",
-    record_runtime = FALSE
+    description = "test"
   )
 
   df1 <- data.frame(x = 1:3)
@@ -111,8 +107,7 @@ test_that("tinytrail_dict() warns and overwrites on duplicate df name", {
   tinytrail(
     name        = "test.R",
     data_source = "none",
-    description = "test",
-    record_runtime = FALSE
+    description = "test"
   )
 
   dat <- data.frame(x = 1:3)
@@ -132,8 +127,7 @@ test_that("tinytrail_dict() omits sample values when sample_values = FALSE", {
   tinytrail(
     name        = "test.R",
     data_source = "none",
-    description = "test",
-    record_runtime = FALSE
+    description = "test"
   )
 
   df <- data.frame(x = 1:3, y = letters[1:3])
@@ -152,8 +146,7 @@ test_that("tinytrail_dict() truncates long strings at sample_string_length", {
   tinytrail(
     name        = "test.R",
     data_source = "none",
-    description = "test",
-    record_runtime = FALSE
+    description = "test"
   )
 
   df <- data.frame(label = c("short", "this is a very long string indeed"), x = 1:2)
@@ -174,8 +167,7 @@ test_that("tinytrail_dict() respects sample_string_length = Inf", {
   tinytrail(
     name        = "test.R",
     data_source = "none",
-    description = "test",
-    record_runtime = FALSE
+    description = "test"
   )
 
   long <- paste(rep("a", 100), collapse = "")
@@ -195,8 +187,7 @@ test_that("n_outputs is correct after lapply over multiple outputs", {
   tinytrail(
     name        = "test.R",
     data_source = "none",
-    description = "test",
-    record_runtime = FALSE
+    description = "test"
   )
 
   paths <- file.path(tmp, paste0("plot_", 1:3, ".png"))
@@ -216,8 +207,7 @@ test_that("n_outputs is correct after purrr::map over multiple outputs", {
   tinytrail(
     name        = "test.R",
     data_source = "none",
-    description = "test",
-    record_runtime = FALSE
+    description = "test"
   )
 
   paths <- file.path(tmp, paste0("plot_", 1:3, ".png"))
@@ -236,8 +226,7 @@ test_that("all three functions work together without source() (simple_main scena
   tinytrail(
     name           = "simple_main.R",
     data_source    = "mtcars (built-in)",
-    description    = "smoke test without source()",
-    record_runtime = FALSE
+    description    = "smoke test without source()"
   )
 
   mtcars |> tinytrail_dict()

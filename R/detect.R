@@ -39,11 +39,6 @@
   NULL
 }
 
-.in_knitr <- function() {
-  requireNamespace("knitr", quietly = TRUE) &&
-    !is.null(tryCatch(knitr::current_input(), error = function(e) NULL))
-}
-
 .get_current_script_name <- function() {
   # 1. source() call stack -- standard usage
   idx <- .source_frame_idx()
@@ -56,8 +51,8 @@
   }
   # 2. knitr / Quarto rendering
   if (requireNamespace("knitr", quietly = TRUE)) {
-    input <- tryCatch(knitr::current_input(), error = function(e) NULL)
-    if (is.character(input) && nzchar(input)) return(basename(input))
+    input <- tryCatch(knitr::current_input(dir = TRUE), error = function(e) NULL)
+    if (is.character(input) && nzchar(input)) return(.knitr_source_name(input))
   }
   # 3. Rscript path/to/script.R
   file_arg <- grep("^--file=", commandArgs(trailingOnly = FALSE), value = TRUE)
@@ -68,4 +63,24 @@
     if (is.character(path) && nzchar(path)) return(basename(path))
   }
   NULL
+}
+
+# Map the file knitr is processing back to the file the user wrote.
+# Quarto knits a temporary copy of report.qmd called report.rmarkdown, and
+# rendering a plain script.R knits script.spin.Rmd. Without this mapping a
+# render and an interactive run (which sees report.qmd) create two entries.
+.knitr_source_name <- function(input) {
+  base <- basename(input)
+  dir  <- dirname(input)
+  if (grepl("\\.rmarkdown$", base, ignore.case = TRUE)) {
+    stem       <- sub("\\.rmarkdown$", "", base, ignore.case = TRUE)
+    candidates <- paste0(stem, c(".qmd", ".Rmd", ".rmd", ".R", ".r"))
+  } else if (grepl("\\.spin\\.Rmd$", base, ignore.case = TRUE)) {
+    stem       <- sub("\\.spin\\.Rmd$", "", base, ignore.case = TRUE)
+    candidates <- paste0(stem, c(".R", ".r"))
+  } else {
+    return(base)
+  }
+  found <- candidates[file.exists(file.path(dir, candidates))]
+  if (length(found) > 0L) found[[1L]] else candidates[[1L]]
 }

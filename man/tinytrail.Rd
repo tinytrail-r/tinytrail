@@ -8,7 +8,7 @@ tinytrail(
   description,
   data_source = NULL,
   pin_to_top = FALSE,
-  record_runtime = TRUE,
+  record_runtime = NULL,
   name = NULL,
   auto = TRUE,
   extra_hooks = NULL
@@ -25,7 +25,8 @@ this script — name the dataset or survey, not a file path
 for a \code{main.R} that sources other scripts — keeps it visible at the top of
 \verb{_tinytrail.yaml} regardless of alphabetical order. Default \code{FALSE}.}
 
-\item{record_runtime}{Logical. Record elapsed time on exit. Default \code{TRUE}.}
+\item{record_runtime}{Deprecated and ignored. To record how long a script
+takes, put \code{\link[=tinytrail_the_end]{tinytrail_the_end()}} at the end of the script.}
 
 \item{name}{Character. Override the auto-detected script name. Intended for
 use in tests and non-standard execution environments where auto-detection
@@ -64,7 +65,6 @@ withr::with_tempdir({
   tinytrail(
     description    = "Clean and summarise survey data",
     data_source    = "Current Population Survey (BLS)",
-    record_runtime = FALSE,
     name           = "clean.R"
   )
   write.csv(mtcars, "clean.csv")
@@ -74,5 +74,6 @@ withr::with_tempdir({
 }
 \seealso{
 \code{\link[=tinytrail_write]{tinytrail_write()}} to record output paths explicitly,
-\code{\link[=tinytrail_dict]{tinytrail_dict()}} to capture a data dictionary.
+\code{\link[=tinytrail_dict]{tinytrail_dict()}} to capture a data dictionary,
+\code{\link[=tinytrail_the_end]{tinytrail_the_end()}} to record the total runtime.
 }

@@ -1,4 +1,4 @@
-# Public API: tinytrail(), tinytrail_write(), tinytrail_dict()
+# Public API: tinytrail(), tinytrail_write(), tinytrail_dict(), tinytrail_the_end()
 #
 # Sub-functions used exclusively by the public API are defined first.
 
@@ -21,50 +21,6 @@
   lapply(scripts[c(pinned, rest)], .order_registry_entry)
 }
 
-.setup_runtime_hook <- function(script_name, registry_path, start_sec, source_idx) {
-  record_elapsed <- local({
-    script_name   <- script_name
-    registry_path <- registry_path
-    start_sec     <- start_sec
-    function() {
-      elapsed_min <- round((as.numeric(Sys.time()) - start_sec) / 60, 1)
-      if (!file.exists(registry_path)) return()
-      registry <- yaml::read_yaml(registry_path)
-      if (is.null(registry$scripts[[script_name]])) return()
-      registry$scripts[[script_name]]$script_runtime <- sprintf("%.1f min", elapsed_min)
-      registry$scripts <- lapply(registry$scripts, .order_registry_entry)
-      .write_registry(registry, registry_path)
-      message(script_name, ": ", sprintf("%.1f min", elapsed_min), " elapsed")
-    }
-  })
-
-  if (length(source_idx) == 0L) {
-    if (.in_knitr()) {
-      old_hook <- knitr::knit_hooks$get("document")
-      knitr::knit_hooks$set(document = local({
-        record_elapsed <- record_elapsed
-        old_hook       <- old_hook
-        function(x) {
-          record_elapsed()
-          if (is.function(old_hook)) old_hook(x) else x
-        }
-      }))
-    } else {
-      message(
-        "runtime tracking requires source() -- run via source(here(\"scripts/", script_name, "\")) ",
-        "to record elapsed time"
-      )
-    }
-  } else {
-    idx_val <- source_idx[length(source_idx)]
-    do.call(
-      on.exit,
-      list(bquote(.(record_elapsed)()), add = TRUE, after = TRUE),
-      envir = sys.frame(idx_val)
-    )
-  }
-}
-
 #' Register a script in the project trail
 #'
 #' Call once near the top of every script. Creates or updates an entry in
@@ -82,7 +38,8 @@
 #' @param pin_to_top Logical. Pin this script to the top of the trail. Useful
 #'   for a `main.R` that sources other scripts — keeps it visible at the top of
 #'   `_tinytrail.yaml` regardless of alphabetical order. Default `FALSE`.
-#' @param record_runtime Logical. Record elapsed time on exit. Default `TRUE`.
+#' @param record_runtime Deprecated and ignored. To record how long a script
+#'   takes, put [tinytrail_the_end()] at the end of the script.
 #' @param name Character. Override the auto-detected script name. Intended for
 #'   use in tests and non-standard execution environments where auto-detection
 #'   is unavailable.
@@ -99,7 +56,8 @@
 #' @returns `name` (the script name), invisibly. Called for its side effect of
 #'   creating or updating the YAML trail file in the project root.
 #' @seealso [tinytrail_write()] to record output paths explicitly,
-#'   [tinytrail_dict()] to capture a data dictionary.
+#'   [tinytrail_dict()] to capture a data dictionary,
+#'   [tinytrail_the_end()] to record the total runtime.
 #' @export
 #'
 #' @examples
@@ -110,7 +68,6 @@
 #'   tinytrail(
 #'     description    = "Clean and summarise survey data",
 #'     data_source    = "Current Population Survey (BLS)",
-#'     record_runtime = FALSE,
 #'     name           = "clean.R"
 #'   )
 #'   write.csv(mtcars, "clean.csv")
@@ -120,10 +77,18 @@
 tinytrail <- function(description,
                       data_source  = NULL,
                       pin_to_top   = FALSE,
-                      record_runtime = TRUE,
+                      record_runtime = NULL,
                       name         = NULL,
                       auto         = TRUE,
                       extra_hooks  = NULL) {
+  if (!is.null(record_runtime)) {
+    warning(
+      "tinytrail(): `record_runtime` is deprecated and ignored. ",
+      "Put tinytrail_the_end() at the end of the script to record the runtime.",
+      call. = FALSE
+    )
+  }
+
   name <- name %||% .get_current_script_name()
   if (is.null(name)) {
     message("tinytrail: could not detect script name; run via source()")
@@ -148,7 +113,7 @@ tinytrail <- function(description,
   if (sample(.TIP_FREQUENCY, 1L) == 1L) {
     message(
       "tinytrail tip: place tinytrail() at the very top of '", name, "' ",
-      "(before library() calls) so the runtime covers the full script, not just the code after it."
+      "(before library() calls) so tinytrail_the_end() measures the full script."
     )
   }
 
@@ -157,16 +122,7 @@ tinytrail <- function(description,
 
   options(.tinytrail_current_script = name)
 
-  if (record_runtime) {
-    start_sec  <- as.numeric(Sys.time())
-    source_idx <- .source_frame_idx()
-    .setup_runtime_hook(
-      script_name   = name,
-      registry_path = registry_path,
-      start_sec     = start_sec,
-      source_idx    = source_idx
-    )
-  }
+  .runtime_starts[[name]] <- Sys.time()
 
   if (auto) {
     .setup_write_hooks(extra = extra_hooks)
@@ -205,8 +161,7 @@ tinytrail <- function(description,
 #' withr::with_tempdir({
 #'   writeLines("Package: testproject\nVersion: 0.1.0", "DESCRIPTION")
 #'
-#'   tinytrail("Process raw data", name = "analysis.R", record_runtime = FALSE,
-#'             auto = FALSE)
+#'   tinytrail("Process raw data", name = "analysis.R", auto = FALSE)
 #'   write.csv(mtcars, tinytrail_write("clean.csv"))
 #'   saveRDS(lm(mpg ~ wt, mtcars), tinytrail_write("model.rds"))
 #' })
@@ -279,7 +234,7 @@ tinytrail_write <- function(file) {
 #' withr::with_tempdir({
 #'   writeLines("Package: testproject\nVersion: 0.1.0", "DESCRIPTION")
 #'
-#'   tinytrail("Analyse data", name = "analysis.R", record_runtime = FALSE)
+#'   tinytrail("Analyse data", name = "analysis.R")
 #'   dat <- mtcars |> tinytrail_dict(df_name = "cars")
 #' })
 #' }
@@ -335,4 +290,62 @@ tinytrail_dict <- function(df, df_name = NULL, sample_values = TRUE, sample_stri
   .write_registry(registry, registry_path)
 
   invisible(df)
+}
+
+#' Record the total runtime of a script
+#'
+#' Sometimes it's nice to know the total runtime. Add `tinytrail_the_end()`
+#' at the end of the script; it records the time between [tinytrail()] and
+#' this marker as `script_runtime` in `_tinytrail.yaml`.
+#'
+#' Caveat: if you run the code line by line, the time may not be reliable,
+#' because it then includes any pauses between lines.
+#'
+#' @return The runtime in minutes, invisibly.
+#' @seealso [tinytrail()] to initialise the trail.
+#' @export
+#'
+#' @examples
+#' \donttest{
+#' withr::with_tempdir({
+#'   writeLines("Package: testproject\nVersion: 0.1.0", "DESCRIPTION")
+#'
+#'   tinytrail("Slow analysis", name = "analysis.R")
+#'   Sys.sleep(1)
+#'   tinytrail_the_end()
+#' })
+#' }
+tinytrail_the_end <- function() {
+  # Prefer the script this marker sits in, so that tinytrail_the_end() in a
+  # main.R that sources other scripts records main.R, not the last sourced one.
+  detected    <- .get_current_script_name()
+  script_name <- if (!is.null(detected) && !is.null(.runtime_starts[[detected]])) {
+    detected
+  } else {
+    getOption(".tinytrail_current_script")
+  }
+  start <- if (!is.null(script_name)) .runtime_starts[[script_name]]
+
+  if (is.null(start)) {
+    .warn_no_tinytrail(
+      script_name   = .get_current_script_name() %||% "<unknown script>",
+      registry_path = .registry_path()
+    )
+    return(invisible(NULL))
+  }
+
+  elapsed_min <- round(as.numeric(difftime(Sys.time(), start, units = "mins")), 1)
+
+  registry_path <- .registry_path()
+  if (file.exists(registry_path)) {
+    registry <- yaml::read_yaml(registry_path)
+    if (!is.null(registry$scripts[[script_name]])) {
+      registry$scripts[[script_name]]$script_runtime <- sprintf("%.1f min", elapsed_min)
+      registry$scripts <- lapply(registry$scripts, .order_registry_entry)
+      .write_registry(registry, registry_path)
+    }
+  }
+  message(script_name, ": ", sprintf("%.1f min", elapsed_min), " runtime")
+
+  invisible(elapsed_min)
 }

@@ -32,6 +32,8 @@ write.csv(dat, "output/clean.csv")   # auto-tracked
 png("output/age_dist.png")           # auto-tracked
 hist(dat$age, main = "Age distribution")
 dev.off()
+
+tinytrail_the_end()                  # optional: records script_runtime
 ```
 
 `tinytrail()` detects the script name and creates or updates `_tinytrail.yaml`:

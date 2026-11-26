@@ -11,3 +11,6 @@
 .REGISTRY_FILENAME  <- "_tinytrail.yaml"
 .KEY_ORDER          <- c("description", "data_source", "first_run",
                          "latest_run", "script_runtime", "n_outputs", "outputs")
+
+# Start time of each script, set by tinytrail(), read by tinytrail_the_end()
+.runtime_starts <- new.env(parent = emptyenv())
