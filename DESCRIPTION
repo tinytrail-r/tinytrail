@@ -1,6 +1,6 @@
 Package: tinytrail
 Title: Lightweight Auto-Updating Project Tracker and Data Dictionary
-Version: 0.1.0
+Version: 0.2.0
 Authors@R:
     person("Tomas", "Reivinger", , "tomas.reivinger@gmail.com", role = c("aut", "cre", "cph"))
 Description: Once initialized, the package leaves a 'tiny trail' of human- and AI-readable

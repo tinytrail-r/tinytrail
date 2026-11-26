@@ -1,27 +1,16 @@
-── R CMD check results ──────────────────────────────────────────────────────── tinytrail 0.1.0 ────
-Duration: 26.4s
+## Update
 
-❯ checking CRAN incoming feasibility ... [2s/12s] NOTE
-  Maintainer: ‘Tomas Reivinger <tomas.reivinger@gmail.com>’
-  
-  New submission
+This is an update from 0.1.0 to 0.2.0. It adds `tinytrail_the_end()`,
+deprecates the `record_runtime` argument of `tinytrail()` and fixes several
+bugs in output recording (see NEWS.md).
 
-❯ checking HTML version of manual ... NOTE
-  Skipping checking HTML validation: 'tidy' doesn't look like recent enough HTML Tidy.
-  Please obtain a recent version of HTML Tidy by downloading a binary
-  release or compiling the source code from <https://www.html-tidy.org/>.
+## R CMD check results
 
-0 errors ✔ | 0 warnings ✔ | 2 notes ✖
+0 errors | 0 warnings | 0 notes
 
-## win-builder (R-devel)
-
-0 errors ✔ | 0 warnings ✔ | 1 note ✖
-
-❯ checking CRAN incoming feasibility ... NOTE
-  Maintainer: 'Tomas Reivinger <tomas.reivinger@gmail.com>'
-
-  New submission
+* Local: Ubuntu 24.04, R 4.3.3, `R CMD check --as-cran`.
+* win-builder (R-devel): 0 errors | 0 warnings | 0 notes
 
 ## Reverse dependencies
 
-This is a new package. There are currently no downstream dependencies.
+There are currently no reverse dependencies on CRAN.
