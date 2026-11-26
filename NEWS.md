@@ -3,6 +3,8 @@
 * New `tinytrail_the_end()`: put it at the end of a script to record the time since `tinytrail()` as `script_runtime`.
 * `tinytrail()` no longer tries to detect when a script ends, so it no longer prints "runtime tracking requires source() ...". The `record_runtime` argument is deprecated and ignored.
 
+* Rendering with Quarto (`report.rmarkdown`) or rendering a plain script (`script.spin.Rmd`) now records the source file name (`report.qmd`, `script.R`), so a render and an interactive run update the same entry instead of creating duplicates.
+
 # tinytrail 0.1.0
 
 * Initial release (renamed from `tinylog`).

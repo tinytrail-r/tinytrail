@@ -69,3 +69,52 @@ test_that("base::source() is detected as a source() call", {
   base::source("ns_script.R", local = new.env(parent = asNamespace("tinytrail")))
   expect_equal(getOption(".tinytrail_current_script"), "ns_script.R")
 })
+
+test_that(".knitr_source_name() maps knitr's working copies back to the source file", {
+  tmp <- withr::local_tempdir()
+  file.create(file.path(tmp, c("rapport.qmd", "notes.Rmd", "clean.R")))
+
+  expect_equal(.knitr_source_name(file.path(tmp, "rapport.rmarkdown")), "rapport.qmd")
+  expect_equal(.knitr_source_name(file.path(tmp, "notes.rmarkdown")), "notes.Rmd")
+  expect_equal(.knitr_source_name(file.path(tmp, "clean.spin.Rmd")), "clean.R")
+  expect_equal(.knitr_source_name(file.path(tmp, "clean.rmarkdown")), "clean.R")
+  # Ordinary inputs are left alone
+  expect_equal(.knitr_source_name(file.path(tmp, "notes.Rmd")), "notes.Rmd")
+  # Source file not found: fall back to the most likely name
+  expect_equal(.knitr_source_name(file.path(tmp, "missing.rmarkdown")), "missing.qmd")
+})
+
+test_that("a Quarto-style render records report.qmd, not report.rmarkdown", {
+  skip_if_not_installed("knitr")
+  tmp <- withr::local_tempdir()
+  withr::local_dir(tmp)
+  local_clean_options()
+  writeLines("Package: testproject", "DESCRIPTION")
+  doc <- c("```{r}", "tinytrail::tinytrail('report', auto = FALSE)", "```")
+  writeLines(doc, "report.qmd")
+  # Quarto knits a copy of the .qmd with the .rmarkdown extension
+  writeLines(doc, "report.rmarkdown")
+
+  suppressMessages(knitr::knit("report.rmarkdown", output = "report.md", quiet = TRUE))
+
+  reg <- yaml::read_yaml("_tinytrail.yaml")
+  expect_true("report.qmd" %in% names(reg$scripts))
+  expect_false("report.rmarkdown" %in% names(reg$scripts))
+})
+
+test_that("rendering a plain .R script records script.R, not script.spin.Rmd", {
+  skip_if_not_installed("knitr")
+  skip_if_not_installed("rmarkdown")
+  skip_if_not(rmarkdown::pandoc_available())
+  tmp <- withr::local_tempdir()
+  withr::local_dir(tmp)
+  local_clean_options()
+  writeLines("Package: testproject", "DESCRIPTION")
+  writeLines("tinytrail::tinytrail('spun', auto = FALSE)", "spun.R")
+
+  suppressMessages(rmarkdown::render("spun.R", output_format = "md_document", quiet = TRUE))
+
+  reg <- yaml::read_yaml("_tinytrail.yaml")
+  expect_true("spun.R" %in% names(reg$scripts))
+  expect_false("spun.spin.Rmd" %in% names(reg$scripts))
+})
