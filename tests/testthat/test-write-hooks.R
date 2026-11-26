@@ -403,3 +403,38 @@ test_that("user writes are still recorded while IDE internals are attached", {
   expect_true(has_output("top.csv"))
   expect_true(has_output("nested.rds"))
 })
+
+test_that("files written by knitr itself are not recorded, chunk writes are", {
+  skip_if_not_installed("knitr")
+  tmp <- withr::local_tempdir()
+  local_session(tmp)
+  writeLines(c(
+    "```{r plot}",
+    "plot(1:10)",
+    "```",
+    "```{r cached, cache=TRUE}",
+    "plot(2)",
+    "```",
+    "```{r save}",
+    "write.csv(mtcars, 'chunk.csv')",
+    "png('chunk_plot.png'); plot(1); invisible(dev.off())",
+    "```"
+  ), "report.Rmd")
+  suppressMessages(knitr::knit("report.Rmd", quiet = TRUE, envir = new.env()))
+
+  outputs <- unlist(yaml::read_yaml("_tinytrail.yaml")$scripts[["test.R"]]$outputs)
+  expect_true(has_output("chunk.csv"))
+  expect_true(has_output("chunk_plot.png"))
+  expect_false(any(grepl("figure/", outputs, fixed = TRUE)))  # chunk figures
+  expect_false(any(grepl("cache/", outputs, fixed = TRUE)))   # knitr cache
+  expect_setequal(basename(outputs), c("chunk.csv", "chunk_plot.png"))
+})
+
+test_that("writes through other packages' functionals are still recorded", {
+  tmp <- withr::local_tempdir()
+  local_session(tmp)
+  invisible(lapply("lapply.rds", function(f) saveRDS(1, f)))
+  invisible(Map(saveRDS, list(1), "map.rds"))
+  expect_true(has_output("lapply.rds"))
+  expect_true(has_output("map.rds"))
+})
