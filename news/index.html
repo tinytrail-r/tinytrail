@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">tinytrail</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -34,11 +34,23 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="development version" id="tinytrail-development-version">tinytrail (development version)<a class="anchor" aria-label="anchor" href="#tinytrail-development-version"></a></h2>
-<ul><li><p>New <code><a href="../reference/tinytrail_the_end.html">tinytrail_the_end()</a></code>: put it at the end of a script to record the time since <code><a href="../reference/tinytrail.html">tinytrail()</a></code> as <code>script_runtime</code>.</p></li>
-<li><p><code><a href="../reference/tinytrail.html">tinytrail()</a></code> no longer tries to detect when a script ends, so it no longer prints “runtime tracking requires source() …”. The <code>record_runtime</code> argument is deprecated and ignored.</p></li>
-<li><p>Rendering with Quarto (<code>report.rmarkdown</code>) or rendering a plain script (<code>script.spin.Rmd</code>) now records the source file name (<code>report.qmd</code>, <code>script.R</code>), so a render and an interactive run update the same entry instead of creating duplicates.</p></li>
+<h2 class="pkg-version" data-toc-text="0.2.0" id="tinytrail-020">tinytrail 0.2.0<a class="anchor" aria-label="anchor" href="#tinytrail-020"></a></h2>
+<div class="section level3">
+<h3 id="new-features-0-2-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-2-0"></a></h3>
+<ul><li>New <code><a href="../reference/tinytrail_the_end.html">tinytrail_the_end()</a></code>: put it at the end of a script to record the time since <code><a href="../reference/tinytrail.html">tinytrail()</a></code> as <code>script_runtime</code> (<a href="https://github.com/tinytrail-r/tinytrail/issues/12" class="external-link">#12</a>).</li>
 </ul></div>
+<div class="section level3">
+<h3 id="deprecations-0-2-0">Deprecations<a class="anchor" aria-label="anchor" href="#deprecations-0-2-0"></a></h3>
+<ul><li>The <code>record_runtime</code> argument of <code><a href="../reference/tinytrail.html">tinytrail()</a></code> is deprecated and ignored (it gives a warning if set). <code><a href="../reference/tinytrail.html">tinytrail()</a></code> no longer tries to detect when a script ends, so it no longer prints “runtime tracking requires source() …” (<a href="https://github.com/tinytrail-r/tinytrail/issues/12" class="external-link">#12</a>).</li>
+</ul></div>
+<div class="section level3">
+<h3 id="bug-fixes-0-2-0">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-2-0"></a></h3>
+<ul><li>
+<code><a href="../reference/tinytrail_write.html">tinytrail_write()</a></code> and the automatic hooks now record outputs written from inside anonymous functions, <code><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply()</a></code>/<code><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply()</a></code> and Quarto chunks, instead of failing with “values must be length 1” (<a href="https://github.com/tinytrail-r/tinytrail/issues/9" class="external-link">#9</a>).</li>
+<li>Automatic recording now only records files saved by the user’s own code. Writes made by RStudio, knitr, rmarkdown, evaluate and Quarto (chunk figures, cache, plot previews) and files in R’s session temp folder are skipped (<a href="https://github.com/tinytrail-r/tinytrail/issues/9" class="external-link">#9</a>).</li>
+<li>Rendering with Quarto (<code>report.rmarkdown</code>) or rendering a plain script (<code>script.spin.Rmd</code>) now records the source file name (<code>report.qmd</code>, <code>script.R</code>), so a render and an interactive run update the same entry instead of creating duplicates (<a href="https://github.com/tinytrail-r/tinytrail/issues/13" class="external-link">#13</a>).</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0" id="tinytrail-010">tinytrail 0.1.0<a class="anchor" aria-label="anchor" href="#tinytrail-010"></a></h2><p class="text-muted">CRAN release: 2026-07-04</p>
 <ul><li>Initial release (renamed from <code>tinylog</code>).</li>
