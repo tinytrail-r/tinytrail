@@ -11,3 +11,6 @@
 .REGISTRY_FILENAME  <- "_tinytrail.yaml"
 .KEY_ORDER          <- c("description", "data_source", "first_run",
                          "latest_run", "script_runtime", "n_outputs", "outputs")
+
+# Keeps Rscript runtime finalizers alive until R exits (see .setup_runtime_hook)
+.runtime_anchors <- new.env(parent = emptyenv())

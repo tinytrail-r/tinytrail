@@ -38,31 +38,39 @@
     }
   })
 
-  if (length(source_idx) == 0L) {
-    if (.in_knitr()) {
-      old_hook <- knitr::knit_hooks$get("document")
-      knitr::knit_hooks$set(document = local({
-        record_elapsed <- record_elapsed
-        old_hook       <- old_hook
-        function(x) {
-          record_elapsed()
-          if (is.function(old_hook)) old_hook(x) else x
-        }
-      }))
-    } else {
-      message(
-        "runtime tracking requires source() -- run via source(here(\"scripts/", script_name, "\")) ",
-        "to record elapsed time"
-      )
-    }
-  } else {
+  if (length(source_idx) > 0L) {
+    # source() / RStudio "Source": record when the source() call returns.
     idx_val <- source_idx[length(source_idx)]
     do.call(
       on.exit,
       list(bquote(.(record_elapsed)()), add = TRUE, after = TRUE),
       envir = sys.frame(idx_val)
     )
+  } else if (.in_knitr()) {
+    # knitr::knit(), rmarkdown::render(), quarto render, RStudio "Knit"/"Render":
+    # record when the document has finished. knitr restores its hooks after
+    # each document, so this does not leak into later renders.
+    old_hook <- knitr::knit_hooks$get("document")
+    knitr::knit_hooks$set(document = local({
+      record_elapsed <- record_elapsed
+      old_hook       <- old_hook
+      function(x) {
+        record_elapsed()
+        if (is.function(old_hook)) old_hook(x) else x
+      }
+    }))
+  } else if (!interactive()) {
+    # Rscript script.R / R CMD BATCH: record when R exits. The anchor
+    # environment is kept alive in .runtime_anchors so the finalizer only runs
+    # at exit, not at an earlier garbage collection.
+    anchor <- new.env(parent = emptyenv())
+    reg.finalizer(anchor, function(e) try(record_elapsed(), silent = TRUE), onexit = TRUE)
+    .runtime_anchors[[script_name]] <- anchor
   }
+  # Interactive line-by-line / chunk-by-chunk runs (including RStudio
+  # "Run All") have no end point to hook into, so nothing is recorded.
+  # Documented under "Runtime tracking" in ?tinytrail.
+  invisible(NULL)
 }
 
 #' Register a script in the project trail
@@ -82,7 +90,10 @@
 #' @param pin_to_top Logical. Pin this script to the top of the trail. Useful
 #'   for a `main.R` that sources other scripts — keeps it visible at the top of
 #'   `_tinytrail.yaml` regardless of alphabetical order. Default `FALSE`.
-#' @param record_runtime Logical. Record elapsed time on exit. Default `TRUE`.
+#' @param record_runtime Logical. Record how long the script takes to run, in
+#'   minutes, as `script_runtime` in `_tinytrail.yaml`. Default `TRUE`. Only
+#'   some ways of running a script can be timed; see the *Runtime tracking*
+#'   section below.
 #' @param name Character. Override the auto-detected script name. Intended for
 #'   use in tests and non-standard execution environments where auto-detection
 #'   is unavailable.
@@ -95,6 +106,44 @@
 #'   function, or `"pkg::fn"` for a package function). `arg` is a character
 #'   vector of the corresponding file-path argument names. Functions from
 #'   packages that are not installed are silently skipped.
+#'
+#' @section Runtime tracking:
+#' Some scripts take minutes or hours to run, and a project often has several
+#' of them that are rerun many times, for example a `main.R` that sources a
+#' cleaning script, a modelling script and a report. With
+#' `record_runtime = TRUE`, each script's entry in `_tinytrail.yaml` gets a
+#' `script_runtime` field, such as `script_runtime: 12.4 min`, so you can see
+#' at a glance which steps are slow and how long a full rerun will take.
+#'
+#' The time is wall-clock time from the `tinytrail()` call until the script
+#' finishes, so place `tinytrail()` at the very top of the script, before
+#' `library()` calls. Each run replaces the previous value. When the time is
+#' recorded, a line such as `clean.R: 12.4 min elapsed` is printed.
+#'
+#' Whether the time can be recorded depends on how the script is run, because
+#' tinytrail needs to know when the script has finished:
+#'
+#' | How the script is run | Time recorded? |
+#' |---|---|
+#' | `source("scripts/clean.R")`, also when called from another script such as `main.R` | Yes, when `source()` returns |
+#' | RStudio **Source** button (Ctrl+Shift+S) or **Source with Echo** (Ctrl+Shift+Enter) | Yes, these call `source()` |
+#' | `Rscript scripts/clean.R` or `R CMD BATCH`, for example from a scheduled task | Yes, when R exits |
+#' | `quarto render report.qmd` (R code chunks run with knitr), or the RStudio **Render** button | Yes, when the document has finished |
+#' | `rmarkdown::render()`, `knitr::knit()`, or the RStudio **Knit** button | Yes, when the document has finished |
+#' | RStudio **Run All** (Ctrl+Alt+R), **Run** / Ctrl+Enter on selected lines, or running chunks one by one in a `.qmd` or `.Rmd` | No |
+#'
+#' Running code interactively sends it to the console one line or chunk at a
+#' time, so R cannot tell when "the script" has ended, and the time would
+#' include any pauses between chunks. In that case no message is printed and
+#' `script_runtime` is left out of the entry for that run. To get a time,
+#' run the whole file with `source()`, the **Source** button, `Rscript` or a
+#' render instead.
+#'
+#' If a script stops with an error, the time up to the error is recorded when
+#' it is run with `source()` or `Rscript`; a render that fails records no time.
+#'
+#' When `main.R` sources several scripts that each call `tinytrail()`, every
+#' script gets its own `script_runtime`, and `main.R` gets the total.
 #'
 #' @returns `name` (the script name), invisibly. Called for its side effect of
 #'   creating or updating the YAML trail file in the project root.

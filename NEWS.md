@@ -1,3 +1,8 @@
+# tinytrail (development version)
+
+* `tinytrail()` no longer prints "runtime tracking requires source() ..." when a script is run line by line or chunk by chunk. The new *Runtime tracking* section in `?tinytrail` explains which ways of running a script record `script_runtime` and which don't.
+* Runtime is now also recorded when a script is run with `Rscript` or `R CMD BATCH`.
+
 # tinytrail 0.1.0
 
 * Initial release (renamed from `tinylog`).
