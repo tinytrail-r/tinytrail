@@ -117,17 +117,41 @@
   FALSE  # reached top level: user code
 }
 
+# TRUE when `path` is a temporary file of this R session: inside tempdir() but
+# outside the project (the folder holding _tinytrail.yaml). Such files are
+# deleted when R exits, so they are never lasting outputs of a script. RStudio
+# writes inline plot previews there (<hash>.png in Rtmp...) by calling png()
+# straight from its C++ side, which looks like a top-level call, so the caller
+# check in .called_by_tooling() cannot catch it (issue #9). A project that
+# itself lives in tempdir() (tests, reprexes) still has its files recorded.
+.is_session_temp_file <- function(path) {
+  norm <- function(p) {
+    p <- normalizePath(p, winslash = "/", mustWork = FALSE)
+    if (.Platform$OS.type == "windows") tolower(p) else p
+  }
+  inside <- function(dir, root) identical(dir, root) || startsWith(dir, paste0(root, "/"))
+  dir <- dirname(path)
+  if (!grepl("^(/|~|[A-Za-z]:|\\\\)", dir)) dir <- file.path(getwd(), dir)
+  dir <- norm(dir)
+  if (!inside(dir, norm(tempdir()))) return(FALSE)
+  registry <- getOption(".tinytrail_registry_path")
+  project  <- if (is.character(registry)) norm(dirname(registry)) else NULL
+  is.null(project) || !inside(dir, project)
+}
+
 # Traces a single function. Returns TRUE on success, FALSE if unavailable.
 .hook_one <- function(fn_name, pkg, arg) {
   where <- .trace_env(pkg)
   if (is.null(where)) return(FALSE)
 
   from_tooling_ <- .called_by_tooling
+  is_temp_      <- .is_session_temp_file
   tracer <- bquote(
     tryCatch({
       if (!is.null(getOption(".tinytrail_current_script")) && !(.(from_tooling_))(environment())) {
         val <- .(as.name(arg))
-        if (is.character(val) && length(val) == 1L && nzchar(val))
+        if (is.character(val) && length(val) == 1L && nzchar(val) &&
+            !(.(is_temp_))(val))
           tinytrail_write(val)
       }
     }, error = function(e) NULL)

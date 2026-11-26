@@ -438,3 +438,20 @@ test_that("writes through other packages' functionals are still recorded", {
   expect_true(has_output("lapply.rds"))
   expect_true(has_output("map.rds"))
 })
+
+test_that("session temp files outside the project are not recorded", {
+  tmp <- withr::local_tempdir()
+  local_session(tmp)
+  # The test project itself lives in tempdir(), so use a sibling folder that
+  # is in tempdir() but outside the project, like RStudio's inline plot files.
+  other <- withr::local_tempdir()
+  preview <- file.path(other, "132ab11ca11243498a949fc803a5e26a.png")
+  png(preview); plot(1); invisible(dev.off())
+  saveRDS(1, file.path(tempdir(), "scratch.rds"))
+  withr::defer(unlink(file.path(tempdir(), "scratch.rds")))
+  write.csv(mtcars, "kept.csv")
+
+  expect_false(has_output("132ab11ca11243498a949fc803a5e26a.png"))
+  expect_false(has_output("scratch.rds"))
+  expect_true(has_output("kept.csv"))
+})
