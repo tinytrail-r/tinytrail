@@ -40,8 +40,7 @@ to capture a data dictionary.
 withr::with_tempdir({
   writeLines("Package: testproject\nVersion: 0.1.0", "DESCRIPTION")
 
-  tinytrail("Process raw data", name = "analysis.R", record_runtime = FALSE,
-            auto = FALSE)
+  tinytrail("Process raw data", name = "analysis.R", auto = FALSE)
   write.csv(mtcars, tinytrail_write("clean.csv"))
   saveRDS(lm(mpg ~ wt, mtcars), tinytrail_write("model.rds"))
 })

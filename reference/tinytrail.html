@@ -47,7 +47,7 @@ _tinytrail.yaml and sets the script name so that outputs can be recorded."></hea
 <span>  <span class="va">description</span>,</span>
 <span>  data_source <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  pin_to_top <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  record_runtime <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  record_runtime <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  name <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  auto <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  extra_hooks <span class="op">=</span> <span class="cn">NULL</span></span>
@@ -75,7 +75,8 @@ for a <code>main.R</code> that sources other scripts — keeps it visible at the
 
 
 <dt id="arg-record-runtime">record_runtime<a class="anchor" aria-label="anchor" href="#arg-record-runtime"></a></dt>
-<dd><p>Logical. Record elapsed time on exit. Default <code>TRUE</code>.</p></dd>
+<dd><p>Deprecated and ignored. To record how long a script
+takes, put <code><a href="tinytrail_the_end.html">tinytrail_the_end()</a></code> at the end of the script.</p></dd>
 
 
 <dt id="arg-name">name<a class="anchor" aria-label="anchor" href="#arg-name"></a></dt>
@@ -114,7 +115,8 @@ Set <code>auto = FALSE</code> to use explicit <code><a href="tinytrail_write.htm
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="tinytrail_write.html">tinytrail_write()</a></code> to record output paths explicitly,
-<code><a href="tinytrail_dict.html">tinytrail_dict()</a></code> to capture a data dictionary.</p></div>
+<code><a href="tinytrail_dict.html">tinytrail_dict()</a></code> to capture a data dictionary,
+<code><a href="tinytrail_the_end.html">tinytrail_the_end()</a></code> to record the total runtime.</p></div>
     </div>
 
     <div class="section level2">
@@ -126,13 +128,12 @@ Set <code>auto = FALSE</code> to use explicit <code><a href="tinytrail_write.htm
 <span class="r-in"><span>  <span class="fu">tinytrail</span><span class="op">(</span></span></span>
 <span class="r-in"><span>    description    <span class="op">=</span> <span class="st">"Clean and summarise survey data"</span>,</span></span>
 <span class="r-in"><span>    data_source    <span class="op">=</span> <span class="st">"Current Population Survey (BLS)"</span>,</span></span>
-<span class="r-in"><span>    record_runtime <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
 <span class="r-in"><span>    name           <span class="op">=</span> <span class="st">"clean.R"</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/utils/write.table.html" class="external-link">write.csv</a></span><span class="op">(</span><span class="va">mtcars</span>, <span class="st">"clean.csv"</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/grDevices/png.html" class="external-link">png</a></span><span class="op">(</span><span class="st">"age_dist.png"</span><span class="op">)</span>; <span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="va">mtcars</span><span class="op">$</span><span class="va">mpg</span>, main <span class="op">=</span> <span class="st">"MPG"</span><span class="op">)</span>; <span class="fu"><a href="https://rdrr.io/r/grDevices/dev.html" class="external-link">dev.off</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> agg_record_19972efb6cfc </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> agg_record_18c17a9726ca </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                       2 </span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>

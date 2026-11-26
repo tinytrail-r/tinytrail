@@ -113,31 +113,39 @@ any write function:</p>
 <span>  <span class="va">survey</span>,</span>
 <span>  file <span class="op">=</span> <span class="fu"><a href="../reference/tinytrail_write.html">tinytrail_write</a></span><span class="op">(</span><span class="fu">here</span><span class="fu">::</span><span class="fu">here</span><span class="op">(</span><span class="st">"data/clean/survey_clean.csv"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
+<p>Optionally, put <code><a href="../reference/tinytrail_the_end.html">tinytrail_the_end()</a></code> at the end of the
+script. It records the time between <code><a href="../reference/tinytrail.html">tinytrail()</a></code> and this
+marker as <code>script_runtime</code>, which is handy for scripts that
+take a long time to run. If you run the code line by line, the time may
+not be reliable.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># --- end of 01_clean.R ---</span></span>
+<span><span class="fu"><a href="../reference/tinytrail_the_end.html">tinytrail_the_end</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>That is all you need to add. The trail file
 (<code>_tinytrail.yaml</code>) is created in the project root on the
 first run and updated on every subsequent run:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">$version</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.1.0</span></span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="fu">$learn_more</span><span class="kw">:</span><span class="at"> https://github.com/tinytrail-r/tinytrail</span></span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="fu">scripts</span><span class="kw">:</span></span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="at">  </span><span class="fu">01_clean.R</span><span class="kw">:</span></span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="at">    </span><span class="fu">description</span><span class="kw">:</span><span class="at"> Clean and reshape survey data</span></span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="at">    </span><span class="fu">data_source</span><span class="kw">:</span><span class="at"> Current Population Survey (BLS)</span></span>
-<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="at">    </span><span class="fu">first_run</span><span class="kw">:</span><span class="at"> </span><span class="st">'2026-01-15 09:12'</span></span>
-<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="at">    </span><span class="fu">latest_run</span><span class="kw">:</span><span class="at"> </span><span class="st">'2026-01-20 11:05'</span></span>
-<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="at">    </span><span class="fu">script_runtime</span><span class="kw">:</span><span class="at"> 0.3 min</span></span>
-<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="at">    </span><span class="fu">n_outputs</span><span class="kw">:</span><span class="at"> </span><span class="dv">1</span></span>
-<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="at">    </span><span class="fu">outputs</span><span class="kw">:</span></span>
-<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> data/clean/survey_clean.csv</span></span>
-<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="at">  </span><span class="fu">02_model.R</span><span class="kw">:</span></span>
-<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="at">    </span><span class="fu">description</span><span class="kw">:</span><span class="at"> Fit logistic regression</span></span>
-<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="at">    </span><span class="fu">data_source</span><span class="kw">:</span><span class="at"> Cleaned survey data (01_clean.R)</span></span>
-<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="at">    </span><span class="fu">first_run</span><span class="kw">:</span><span class="at"> </span><span class="st">'2026-01-16 14:22'</span></span>
-<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="at">    </span><span class="fu">latest_run</span><span class="kw">:</span><span class="at"> </span><span class="st">'2026-01-20 11:08'</span></span>
-<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a><span class="at">    </span><span class="fu">script_runtime</span><span class="kw">:</span><span class="at"> 1.4 min</span></span>
-<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a><span class="at">    </span><span class="fu">n_outputs</span><span class="kw">:</span><span class="at"> </span><span class="dv">2</span></span>
-<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a><span class="at">    </span><span class="fu">outputs</span><span class="kw">:</span></span>
-<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> results/model_fit.rds</span></span>
-<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> results/table_coefficients.csv</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">$version</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.1.0</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="fu">$learn_more</span><span class="kw">:</span><span class="at"> https://github.com/tinytrail-r/tinytrail</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="fu">scripts</span><span class="kw">:</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="at">  </span><span class="fu">01_clean.R</span><span class="kw">:</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="at">    </span><span class="fu">description</span><span class="kw">:</span><span class="at"> Clean and reshape survey data</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="at">    </span><span class="fu">data_source</span><span class="kw">:</span><span class="at"> Current Population Survey (BLS)</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="at">    </span><span class="fu">first_run</span><span class="kw">:</span><span class="at"> </span><span class="st">'2026-01-15 09:12'</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="at">    </span><span class="fu">latest_run</span><span class="kw">:</span><span class="at"> </span><span class="st">'2026-01-20 11:05'</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="at">    </span><span class="fu">script_runtime</span><span class="kw">:</span><span class="at"> 0.3 min</span></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="at">    </span><span class="fu">n_outputs</span><span class="kw">:</span><span class="at"> </span><span class="dv">1</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="at">    </span><span class="fu">outputs</span><span class="kw">:</span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> data/clean/survey_clean.csv</span></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="at">  </span><span class="fu">02_model.R</span><span class="kw">:</span></span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="at">    </span><span class="fu">description</span><span class="kw">:</span><span class="at"> Fit logistic regression</span></span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="at">    </span><span class="fu">data_source</span><span class="kw">:</span><span class="at"> Cleaned survey data (01_clean.R)</span></span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="at">    </span><span class="fu">first_run</span><span class="kw">:</span><span class="at"> </span><span class="st">'2026-01-16 14:22'</span></span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="at">    </span><span class="fu">latest_run</span><span class="kw">:</span><span class="at"> </span><span class="st">'2026-01-20 11:08'</span></span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="at">    </span><span class="fu">script_runtime</span><span class="kw">:</span><span class="at"> 1.4 min</span></span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="at">    </span><span class="fu">n_outputs</span><span class="kw">:</span><span class="at"> </span><span class="dv">2</span></span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="at">    </span><span class="fu">outputs</span><span class="kw">:</span></span>
+<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> results/model_fit.rds</span></span>
+<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a><span class="at">    </span><span class="kw">-</span><span class="at"> results/table_coefficients.csv</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="adding-a-data-dictionary">Adding a data dictionary<a class="anchor" aria-label="anchor" href="#adding-a-data-dictionary"></a>
@@ -145,20 +153,20 @@ first run and updated on every subsequent run:</p>
 <p><code><a href="../reference/tinytrail_dict.html">tinytrail_dict()</a></code> is an optional third function. Place it
 at the end of a read or clean pipeline to capture column names and
 sample values for each input data frame:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">survey</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"data/raw/survey.csv"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/tinytrail_dict.html">tinytrail_dict</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>The entry is stored under the calling script in the trail file:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">data_dictionary</span><span class="kw">:</span></span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="at">  </span><span class="fu">01_clean.R</span><span class="kw">:</span></span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="at">    </span><span class="fu">survey</span><span class="kw">:</span></span>
-<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="at">      </span><span class="fu">columns</span><span class="kw">:</span></span>
-<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="at">        </span><span class="fu">id</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="dv">1</span><span class="kw">,</span><span class="at"> </span><span class="dv">2</span><span class="kw">,</span><span class="at"> </span><span class="dv">3</span><span class="kw">,</span><span class="at"> </span><span class="dv">4</span><span class="kw">,</span><span class="at"> </span><span class="dv">5</span><span class="kw">]</span></span>
-<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="at">        </span><span class="fu">age</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="dv">34</span><span class="kw">,</span><span class="at"> </span><span class="dv">52</span><span class="kw">,</span><span class="at"> </span><span class="dv">28</span><span class="kw">,</span><span class="at"> </span><span class="dv">41</span><span class="kw">,</span><span class="at"> </span><span class="dv">37</span><span class="kw">]</span></span>
-<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="at">        </span><span class="fu">response</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">'yes'</span><span class="kw">,</span><span class="at"> </span><span class="st">'no'</span><span class="kw">,</span><span class="at"> </span><span class="st">'yes'</span><span class="kw">,</span><span class="at"> </span><span class="st">'yes'</span><span class="kw">,</span><span class="at"> </span><span class="st">'no'</span><span class="kw">]</span></span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">data_dictionary</span><span class="kw">:</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="at">  </span><span class="fu">01_clean.R</span><span class="kw">:</span></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="at">    </span><span class="fu">survey</span><span class="kw">:</span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="at">      </span><span class="fu">columns</span><span class="kw">:</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="at">        </span><span class="fu">id</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="dv">1</span><span class="kw">,</span><span class="at"> </span><span class="dv">2</span><span class="kw">,</span><span class="at"> </span><span class="dv">3</span><span class="kw">,</span><span class="at"> </span><span class="dv">4</span><span class="kw">,</span><span class="at"> </span><span class="dv">5</span><span class="kw">]</span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="at">        </span><span class="fu">age</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="dv">34</span><span class="kw">,</span><span class="at"> </span><span class="dv">52</span><span class="kw">,</span><span class="at"> </span><span class="dv">28</span><span class="kw">,</span><span class="at"> </span><span class="dv">41</span><span class="kw">,</span><span class="at"> </span><span class="dv">37</span><span class="kw">]</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="at">        </span><span class="fu">response</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">'yes'</span><span class="kw">,</span><span class="at"> </span><span class="st">'no'</span><span class="kw">,</span><span class="at"> </span><span class="st">'yes'</span><span class="kw">,</span><span class="at"> </span><span class="st">'yes'</span><span class="kw">,</span><span class="at"> </span><span class="st">'no'</span><span class="kw">]</span></span></code></pre></div>
 <p>To omit sample values and record only column names, use
 <code>sample_values = FALSE</code>:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">survey</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"data/raw/survey.csv"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/tinytrail_dict.html">tinytrail_dict</a></span><span class="op">(</span>sample_values <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -167,7 +175,7 @@ sample values for each input data frame:</p>
 </h2>
 <p>Pin an important script to the top of the trail — useful for a
 <code>main.R</code> that sources other scripts:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/tinytrail.html">tinytrail</a></span><span class="op">(</span></span>
 <span>  description <span class="op">=</span> <span class="st">"Master data preparation"</span>,</span>
 <span>  data_source <span class="op">=</span> <span class="st">"Admin registry (Statistics Sweden)"</span>,</span>

@@ -60,6 +60,20 @@ write.csv(
 )
 ```
 
+Optionally, put
+[`tinytrail_the_end()`](https://tinytrail-r.github.io/tinytrail/reference/tinytrail_the_end.md)
+at the end of the script. It records the time between
+[`tinytrail()`](https://tinytrail-r.github.io/tinytrail/reference/tinytrail.md)
+and this marker as `script_runtime`, which is handy for scripts that
+take a long time to run. If you run the code line by line, the time may
+not be reliable.
+
+``` r
+
+# --- end of 01_clean.R ---
+tinytrail_the_end()
+```
+
 That is all you need to add. The trail file (`_tinytrail.yaml`) is
 created in the project root on the first run and updated on every
 subsequent run:

@@ -34,6 +34,12 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="development version" id="tinytrail-development-version">tinytrail (development version)<a class="anchor" aria-label="anchor" href="#tinytrail-development-version"></a></h2>
+<ul><li><p>New <code><a href="../reference/tinytrail_the_end.html">tinytrail_the_end()</a></code>: put it at the end of a script to record the time since <code><a href="../reference/tinytrail.html">tinytrail()</a></code> as <code>script_runtime</code>.</p></li>
+<li><p><code><a href="../reference/tinytrail.html">tinytrail()</a></code> no longer tries to detect when a script ends, so it no longer prints “runtime tracking requires source() …”. The <code>record_runtime</code> argument is deprecated and ignored.</p></li>
+<li><p>Rendering with Quarto (<code>report.rmarkdown</code>) or rendering a plain script (<code>script.spin.Rmd</code>) now records the source file name (<code>report.qmd</code>, <code>script.R</code>), so a render and an interactive run update the same entry instead of creating duplicates.</p></li>
+</ul></div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0" id="tinytrail-010">tinytrail 0.1.0<a class="anchor" aria-label="anchor" href="#tinytrail-010"></a></h2><p class="text-muted">CRAN release: 2026-07-04</p>
 <ul><li>Initial release (renamed from <code>tinylog</code>).</li>
 <li>
@@ -43,7 +49,8 @@
 <li>
 <code><a href="../reference/tinytrail_dict.html">tinytrail_dict()</a></code> captures column names and sample values for input data frames.</li>
 </ul></div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">

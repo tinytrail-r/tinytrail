@@ -11,7 +11,7 @@ tinytrail(
   description,
   data_source = NULL,
   pin_to_top = FALSE,
-  record_runtime = TRUE,
+  record_runtime = NULL,
   name = NULL,
   auto = TRUE,
   extra_hooks = NULL
@@ -38,7 +38,9 @@ tinytrail(
 
 - record_runtime:
 
-  Logical. Record elapsed time on exit. Default `TRUE`.
+  Deprecated and ignored. To record how long a script takes, put
+  [`tinytrail_the_end()`](https://tinytrail-r.github.io/tinytrail/reference/tinytrail_the_end.md)
+  at the end of the script.
 
 - name:
 
@@ -85,7 +87,9 @@ calls instead.
 [`tinytrail_write()`](https://tinytrail-r.github.io/tinytrail/reference/tinytrail_write.md)
 to record output paths explicitly,
 [`tinytrail_dict()`](https://tinytrail-r.github.io/tinytrail/reference/tinytrail_dict.md)
-to capture a data dictionary.
+to capture a data dictionary,
+[`tinytrail_the_end()`](https://tinytrail-r.github.io/tinytrail/reference/tinytrail_the_end.md)
+to record the total runtime.
 
 ## Examples
 
@@ -97,13 +101,12 @@ withr::with_tempdir({
   tinytrail(
     description    = "Clean and summarise survey data",
     data_source    = "Current Population Survey (BLS)",
-    record_runtime = FALSE,
     name           = "clean.R"
   )
   write.csv(mtcars, "clean.csv")
   png("age_dist.png"); hist(mtcars$mpg, main = "MPG"); dev.off()
 })
-#> agg_record_19972efb6cfc 
+#> agg_record_18c17a9726ca 
 #>                       2 
 # }
 ```
