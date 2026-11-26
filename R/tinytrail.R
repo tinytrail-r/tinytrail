@@ -2,16 +2,13 @@
 #
 # Sub-functions used exclusively by the public API are defined first.
 
-.build_script_entry <- function(description, data_source, pin_to_top, first_run, now,
-                                runtimes = NULL) {
+.build_script_entry <- function(description, data_source, pin_to_top, first_run, now) {
   entry <- list(
     description = description,
     first_run   = first_run %||% now,
     latest_run  = now,
     outputs     = "none"
   )
-  # Keep runtimes from earlier runs: each way of running only updates its own
-  for (f in names(runtimes)) entry[[f]] <- runtimes[[f]]
   if (!is.null(data_source)) entry$data_source <- data_source
   if (pin_to_top) entry$pin_to_top <- TRUE
   entry
@@ -108,8 +105,7 @@ tinytrail <- function(description,
     data_source = data_source,
     pin_to_top  = pin_to_top,
     first_run   = registry$scripts[[name]]$first_run,
-    now         = now,
-    runtimes    = registry$scripts[[name]][intersect(.RUNTIME_FIELDS, names(registry$scripts[[name]]))]
+    now         = now
   )
   registry$scripts[[name]]         <- entry
   registry$data_dictionary[[name]] <- NULL
@@ -300,20 +296,10 @@ tinytrail_dict <- function(df, df_name = NULL, sample_values = TRUE, sample_stri
 #'
 #' Sometimes it's nice to know the total runtime. Add `tinytrail_the_end()`
 #' at the end of the script; it records the time between [tinytrail()] and
-#' this marker in `_tinytrail.yaml`.
+#' this marker as `script_runtime` in `_tinytrail.yaml`.
 #'
-#' The time goes into a field that depends on how the script was run, and
-#' each run only updates its own field:
-#'
-#' * `runtime_render`: rendered, e.g. `quarto render`, `rmarkdown::render()`
-#'   or the RStudio Render/Knit button.
-#' * `runtime_interactive`: run line by line or chunk by chunk, e.g. RStudio
-#'   Run All or Ctrl+Enter.
-#' * `runtime_script`: the whole file run with `source()`, the RStudio Source
-#'   button or `Rscript`.
-#'
-#' Caveat: `runtime_interactive` may not be reliable, because it includes any
-#' pauses between lines or chunks.
+#' Caveat: if you run the code line by line, the time may not be reliable,
+#' because it then includes any pauses between lines.
 #'
 #' @return The runtime in minutes, invisibly.
 #' @seealso [tinytrail()] to initialise the trail.
@@ -349,18 +335,17 @@ tinytrail_the_end <- function() {
   }
 
   elapsed_min <- round(as.numeric(difftime(Sys.time(), start, units = "mins")), 1)
-  field       <- .runtime_field()
 
   registry_path <- .registry_path()
   if (file.exists(registry_path)) {
     registry <- yaml::read_yaml(registry_path)
     if (!is.null(registry$scripts[[script_name]])) {
-      registry$scripts[[script_name]][[field]] <- sprintf("%.1f min", elapsed_min)
+      registry$scripts[[script_name]]$script_runtime <- sprintf("%.1f min", elapsed_min)
       registry$scripts <- lapply(registry$scripts, .order_registry_entry)
       .write_registry(registry, registry_path)
     }
   }
-  message(script_name, ": ", sprintf("%.1f min", elapsed_min), " (", field, ")")
+  message(script_name, ": ", sprintf("%.1f min", elapsed_min), " runtime")
 
   invisible(elapsed_min)
 }

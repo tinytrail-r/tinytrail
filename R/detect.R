@@ -84,12 +84,3 @@
   found <- candidates[file.exists(file.path(dir, candidates))]
   if (length(found) > 0L) found[[1L]] else candidates[[1L]]
 }
-
-# Which runtime field tinytrail_the_end() writes, based on how the code runs.
-.runtime_field <- function() {
-  if (length(.source_frame_idx()) > 0L) return("runtime_script")
-  in_render <- requireNamespace("knitr", quietly = TRUE) &&
-    !is.null(tryCatch(knitr::current_input(), error = function(e) NULL))
-  if (in_render) return("runtime_render")
-  if (interactive()) "runtime_interactive" else "runtime_script"
-}

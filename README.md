@@ -33,7 +33,7 @@ png("output/age_dist.png")           # auto-tracked
 hist(dat$age, main = "Age distribution")
 dev.off()
 
-tinytrail_the_end()                  # optional: records the runtime
+tinytrail_the_end()                  # optional: records script_runtime
 ```
 
 `tinytrail()` detects the script name and creates or updates `_tinytrail.yaml`:
@@ -45,7 +45,7 @@ scripts:
     data_source: Current Population Survey (BLS)
     first_run: '2026-06-27 09:00'
     latest_run: '2026-06-27 09:01'
-    runtime_script: 0.2 min
+    script_runtime: 0.2 min
     n_outputs: 2
     outputs:
     - output/age_dist.png
