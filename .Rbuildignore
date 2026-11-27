@@ -13,3 +13,4 @@
 ^\.github$
 ^scratch$
 ^CRAN-SUBMISSION$
+^CLAUDE\.md$
