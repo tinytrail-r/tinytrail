@@ -2,6 +2,8 @@
 
 ## tinytrail 0.2.0
 
+CRAN release: 2026-11-27
+
 ### New features
 
 - New
